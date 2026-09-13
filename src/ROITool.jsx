@@ -21,7 +21,8 @@ const eur = (n, digits = 0) =>
 const pct = (n, digits = 1) => n.toLocaleString("fr-FR", { maximumFractionDigits: digits }) + " %";
 
 // ---------- field primitives ----------
-function Field({ label, unit, value, onChange, min, max, step, help }) {
+function Field({ label, unit, value, onChange, min, max, step, help, signColor }) {
+  const signClass = signColor ? (value > 0 ? "pos" : value < 0 ? "neg" : "") : "";
   return (
     <div className="field">
       <div className="field-top">
@@ -29,6 +30,7 @@ function Field({ label, unit, value, onChange, min, max, step, help }) {
         <div className="field-value">
           <input
             type="number"
+            className={signClass}
             value={value}
             step={step}
             onChange={(e) => onChange(Number(e.target.value))}
@@ -43,7 +45,7 @@ function Field({ label, unit, value, onChange, min, max, step, help }) {
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="slider"
+        className={`slider${signColor ? " slider-centered" : ""}`}
       />
       {help && <div className="field-help">{help}</div>}
     </div>
@@ -76,8 +78,8 @@ export default function ROITool() {
   const [maintenanceAnnual, setMaintenanceAnnual] = useState(800);
   const [fixedMonthlyOther, setFixedMonthlyOther] = useState(30);
 
-  // Dépréciation & horizon
-  const [depreciationAnnual, setDepreciationAnnual] = useState(12);
+  // Valorisation à la revente (dépréciation ou plus-value) & horizon
+  const [valueChangeAnnual, setValueChangeAnnual] = useState(0);
   const [horizonYears, setHorizonYears] = useState(3);
 
   const calc = useMemo(() => {
@@ -101,7 +103,7 @@ export default function ROITool() {
       }
     }
 
-    const resaleValue = carPrice * Math.pow(1 - depreciationAnnual / 100, horizonYears);
+    const resaleValue = Math.max(0, carPrice * Math.pow(1 + valueChangeAnnual / 100, horizonYears));
     const netEquityAtSale = resaleValue; // pas de prêt : aucune dette à déduire
 
     const totalGain = cumulative + netEquityAtSale - downPayment;
@@ -130,7 +132,7 @@ export default function ROITool() {
     insuranceMonthly,
     maintenanceAnnual,
     fixedMonthlyOther,
-    depreciationAnnual,
+    valueChangeAnnual,
     horizonYears,
   ]);
 
@@ -243,6 +245,8 @@ export default function ROITool() {
           border-radius: 6px;
         }
         .field-value input[type="number"]:focus { outline: 1px solid var(--amber); }
+        .field-value input[type="number"].pos { color: var(--green); }
+        .field-value input[type="number"].neg { color: var(--red); }
         .unit { color: var(--muted); font-size: 12px; }
         .field-help { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
@@ -252,6 +256,14 @@ export default function ROITool() {
           height: 3px;
           border-radius: 2px;
           background: var(--border);
+        }
+        input[type="range"].slider-centered {
+          background: linear-gradient(
+            to right,
+            var(--red) 0%,
+            var(--border) 50%,
+            var(--green) 100%
+          );
         }
         input[type="range"]::-webkit-slider-thumb {
           -webkit-appearance: none;
@@ -396,8 +408,24 @@ export default function ROITool() {
               help="stationnement, carte grise, etc." />
           </Section>
 
-          <Section icon={<Fuel />} title="Dépréciation & horizon">
-            <Field label="Dépréciation" unit="%/an" value={depreciationAnnual} onChange={setDepreciationAnnual} min={0} max={30} step={1} />
+          <Section icon={<Fuel />} title="Valorisation à la revente & horizon">
+            <Field
+              label="Évolution de valeur"
+              unit="%/an"
+              value={valueChangeAnnual}
+              onChange={setValueChangeAnnual}
+              min={-30}
+              max={30}
+              step={1}
+              signColor
+              help={
+                valueChangeAnnual < 0
+                  ? "dépréciation du véhicule chaque année"
+                  : valueChangeAnnual > 0
+                  ? "plus-value du véhicule chaque année"
+                  : "valeur stable (curseur à gauche = dépréciation, à droite = plus-value)"
+              }
+            />
             <Field label="Horizon de revente" unit="ans" value={horizonYears} onChange={setHorizonYears} min={1} max={10} step={1} />
           </Section>
         </div>
