@@ -66,12 +66,22 @@ class TestIdentificationModele(unittest.TestCase):
         )
         self.assertEqual(modele["nom"], "Renault Clio 4")
 
-    def test_autres_generations_de_clio_ignorees(self):
-        for generation in ("CLIO III", "CLIO V"):
-            self.assertIsNone(
-                identifier_modele({"marque": "RENAULT", "modele": generation, "version": ""}),
-                f"{generation} ne doit pas être suivie",
-            )
+    def test_generations_de_clio_ne_se_confondent_pas(self):
+        """Le piège principal : Alcopa vend surtout des Clio, toutes générations mêlées."""
+        attendus = {
+            "CLIO III": "Renault Clio 3",
+            "CLIO IV": "Renault Clio 4",
+            "CLIO V": "Renault Clio 5",
+        }
+        for libelle, attendu in attendus.items():
+            modele = identifier_modele({"marque": "RENAULT", "modele": libelle, "version": ""})
+            self.assertIsNotNone(modele, f"{libelle} devrait être reconnue")
+            self.assertEqual(modele["nom"], attendu, f"{libelle} mal rattachée")
+
+    def test_generation_non_suivie_reste_ignoree(self):
+        self.assertIsNone(
+            identifier_modele({"marque": "RENAULT", "modele": "MEGANE III", "version": ""})
+        )
 
     def test_208_et_2008_ne_se_confondent_pas(self):
         p208 = identifier_modele({"marque": "PEUGEOT", "modele": "208", "version": "208 PURETECH"})
@@ -95,11 +105,17 @@ class TestSelection(unittest.TestCase):
         self.sections = sections_par_modele()
 
     def test_ordre_des_sections_suit_la_configuration(self):
-        noms = [s["modele"] for s in selectionner_affaires(charger())]
-        self.assertEqual(
-            noms,
-            ["Volkswagen Polo", "Renault Clio 4", "Peugeot 208", "Peugeot 2008", "Ford Focus"],
-        )
+        """L'ordre des sections doit suivre la table, quel que soit son contenu."""
+        table = [
+            {"nom": "Peugeot 2008", "prix_moyen": 13500, "marque": "PEUGEOT",
+             "patterns": [r"\b2008\b"], "age_reference": 6},
+            {"nom": "Renault Clio 4", "prix_moyen": 9500, "marque": "RENAULT",
+             "patterns": [r"\bCLIO\s*(?:IV|4)\b"], "age_reference": 9},
+            {"nom": "Ford Focus", "prix_moyen": 11000, "marque": "FORD",
+             "patterns": [r"\bFOCUS\b"], "age_reference": 6},
+        ]
+        noms = [s["modele"] for s in selectionner_affaires(charger(), modeles=table)]
+        self.assertEqual(noms, ["Peugeot 2008", "Renault Clio 4", "Ford Focus"])
 
     def test_top_plafonne_a_trois(self):
         clio = self.sections["Renault Clio 4"]

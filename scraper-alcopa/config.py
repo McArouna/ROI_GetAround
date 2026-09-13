@@ -54,6 +54,40 @@ MODELES_SUIVIS = [
         "patterns": [r"\bFOCUS\b"],
         "age_reference": 6,
     },
+    # -----------------------------------------------------------------------
+    # Modèles ajoutés au vu du stock réellement proposé par Alcopa : sur une
+    # page de salle de vente relevée en septembre 2026, aucun des cinq modèles
+    # ci-dessus n'était présent, alors que les Clio III/V, Captur et Mégane IV
+    # y sont courantes. Supprimez ce bloc pour revenir à la liste d'origine.
+    # -----------------------------------------------------------------------
+    {
+        "nom": "Renault Clio 5",
+        "prix_moyen": 13500,
+        "marque": "RENAULT",
+        "patterns": [r"\bCLIO\s*(?:V|5)\b"],
+        "age_reference": 4,
+    },
+    {
+        "nom": "Renault Clio 3",
+        "prix_moyen": 4000,
+        "marque": "RENAULT",
+        "patterns": [r"\bCLIO\s*(?:III|3)\b"],
+        "age_reference": 15,
+    },
+    {
+        "nom": "Renault Captur",
+        "prix_moyen": 12500,
+        "marque": "RENAULT",
+        "patterns": [r"\bCAPTUR\b"],
+        "age_reference": 7,
+    },
+    {
+        "nom": "Renault Megane 4",
+        "prix_moyen": 12000,
+        "marque": "RENAULT",
+        "patterns": [r"\bM[EÉ]GANE\s*(?:IV|4)\b"],
+        "age_reference": 7,
+    },
 ]
 
 # ---------------------------------------------------------------------------

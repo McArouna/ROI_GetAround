@@ -1,5 +1,5 @@
 {
-  "genere_le": "2026-09-13T20:52:51+00:00",
+  "genere_le": "2026-09-13T20:57:30+00:00",
   "source": "tests/fixture_cartes.html",
   "nb_vehicules_collectes": 8,
   "avertissement": "Les montants Alcopa sont des enchères en cours ou des mises à prix, pas des prix de vente finaux : une décote élevée sur un lot en 'mise_a_prix' reflète surtout une enchère qui n'a pas encore monté. Les frais de vente s'ajoutent au prix marteau et ne sont pas comptés ici.",
@@ -182,6 +182,180 @@
       "nb_lots_analyses": 0,
       "nb_sous_reference": 0,
       "top": []
+    },
+    {
+      "modele": "Renault Clio 5",
+      "prix_moyen_marche": 13500,
+      "age_reference": 4,
+      "nb_lots_analyses": 0,
+      "nb_sous_reference": 0,
+      "top": []
+    },
+    {
+      "modele": "Renault Clio 3",
+      "prix_moyen_marche": 4000,
+      "age_reference": 15,
+      "nb_lots_analyses": 1,
+      "nb_sous_reference": 1,
+      "top": [
+        {
+          "marque": "RENAULT",
+          "modele": "CLIO III",
+          "version": "CLIO III 1.5 DCI 85",
+          "prix": 800,
+          "type_prix": "mise_a_prix",
+          "kilometrage": 283252,
+          "annee": 2007,
+          "lieu": "Beauvais",
+          "date_vente": "14/09/2026",
+          "lot": "505",
+          "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iii-1200005",
+          "id": "1200005",
+          "prix_moyen_marche": 4000,
+          "prix_reference_ajuste": 2051,
+          "decote_pct": 61.0,
+          "decote_brute_pct": 80.0,
+          "ponderation": {
+            "ponderation_appliquee": true,
+            "age": 19,
+            "age_reference": 15,
+            "km_attendu": 247000,
+            "ecart_km": 36252,
+            "facteur_age": 0.6,
+            "facteur_km": 0.855
+          }
+        }
+      ]
+    },
+    {
+      "modele": "Renault Captur",
+      "prix_moyen_marche": 12500,
+      "age_reference": 7,
+      "nb_lots_analyses": 0,
+      "nb_sous_reference": 0,
+      "top": []
+    },
+    {
+      "modele": "Renault Megane 4",
+      "prix_moyen_marche": 12000,
+      "age_reference": 7,
+      "nb_lots_analyses": 0,
+      "nb_sous_reference": 0,
+      "top": []
+    }
+  ],
+  "vehicules": [
+    {
+      "marque": "RENAULT",
+      "modele": "CLIO IV",
+      "version": "CLIO IV DCI 90 BUSINESS",
+      "prix": 7200,
+      "type_prix": "enchere_courante",
+      "kilometrage": 98000,
+      "annee": 2015,
+      "lieu": "Beauvais",
+      "date_vente": "14/09/2026",
+      "lot": "501",
+      "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-dci-90-1200001",
+      "id": "1200001"
+    },
+    {
+      "marque": "RENAULT",
+      "modele": "CLIO IV",
+      "version": "CLIO IV TCE 90 INTENS",
+      "prix": 7200,
+      "type_prix": "enchere_courante",
+      "kilometrage": 62000,
+      "annee": 2014,
+      "lieu": "Beauvais",
+      "date_vente": "14/09/2026",
+      "lot": "502",
+      "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-tce-90-1200002",
+      "id": "1200002"
+    },
+    {
+      "marque": "RENAULT",
+      "modele": "CLIO IV",
+      "version": "CLIO IV 1.5 DCI 75",
+      "prix": 4500,
+      "type_prix": "mise_a_prix",
+      "kilometrage": 175000,
+      "annee": 2013,
+      "lieu": "Beauvais",
+      "date_vente": "14/09/2026",
+      "lot": "503",
+      "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-15-dci-75-1200003",
+      "id": "1200003"
+    },
+    {
+      "marque": "RENAULT",
+      "modele": "CLIO IV",
+      "version": "CLIO IV ESTATE DCI 90",
+      "prix": 9200,
+      "type_prix": "enchere_courante",
+      "kilometrage": 88000,
+      "annee": 2016,
+      "lieu": "Beauvais",
+      "date_vente": "14/09/2026",
+      "lot": "504",
+      "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-estate-1200004",
+      "id": "1200004"
+    },
+    {
+      "marque": "RENAULT",
+      "modele": "CLIO III",
+      "version": "CLIO III 1.5 DCI 85",
+      "prix": 800,
+      "type_prix": "mise_a_prix",
+      "kilometrage": 283252,
+      "annee": 2007,
+      "lieu": "Beauvais",
+      "date_vente": "14/09/2026",
+      "lot": "505",
+      "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iii-1200005",
+      "id": "1200005"
+    },
+    {
+      "marque": "PEUGEOT",
+      "modele": "208",
+      "version": "208 PURETECH 100 ALLURE",
+      "prix": 12800,
+      "type_prix": "enchere_courante",
+      "kilometrage": 45000,
+      "annee": 2021,
+      "lieu": "Beauvais",
+      "date_vente": "14/09/2026",
+      "lot": "506",
+      "url": "https://www.alcopa-auction.fr/voiture-occasion/peugeot/208-puretech-100-1200006",
+      "id": "1200006"
+    },
+    {
+      "marque": "PEUGEOT",
+      "modele": "2008",
+      "version": "2008 BLUEHDI 100 ACTIVE",
+      "prix": 9900,
+      "type_prix": "mise_a_prix",
+      "kilometrage": 112000,
+      "annee": 2019,
+      "lieu": "Beauvais",
+      "date_vente": "14/09/2026",
+      "lot": "507",
+      "url": "https://www.alcopa-auction.fr/voiture-occasion/peugeot/2008-bluehdi-100-1200007",
+      "id": "1200007"
+    },
+    {
+      "marque": "FORD",
+      "modele": "PUMA",
+      "version": "PUMA 1.0 ECOBOOST 125",
+      "prix": 9500,
+      "type_prix": "enchere_courante",
+      "kilometrage": 70000,
+      "annee": 2020,
+      "lieu": "Beauvais",
+      "date_vente": "14/09/2026",
+      "lot": "508",
+      "url": "https://www.alcopa-auction.fr/voiture-occasion/ford/puma-10-1200008",
+      "id": "1200008"
     }
   ]
 }

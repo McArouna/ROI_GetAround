@@ -118,4 +118,8 @@ def construire_resultats(
             "modèle, tous millésimes confondus."
         ),
         "sections": sections,
+        # Tous les lots collectés, y compris ceux d'aucun modèle suivi : permet
+        # de voir ce que propose réellement la salle de vente, pas seulement ce
+        # que la table des modèles en retient.
+        "vehicules": vehicules,
     }

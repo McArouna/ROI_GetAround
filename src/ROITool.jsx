@@ -12,7 +12,9 @@ import {
   Bar,
   LabelList,
 } from "recharts";
-import { Car, Gauge, TrendingUp, Wrench, Fuel, Calculator } from "lucide-react";
+import { Car, Gauge, TrendingUp, Wrench, Fuel, Calculator, Gavel } from "lucide-react";
+
+import AlcopaDeals from "./AlcopaDeals.jsx";
 
 // ---------- helpers ----------
 const eur = (n, digits = 0) =>
@@ -65,6 +67,8 @@ function Section({ icon, title, children }) {
 }
 
 export default function ROITool() {
+  const [vue, setVue] = useState("roi");
+
   // Achat comptant
   const [carPrice, setCarPrice] = useState(20000);
 
@@ -204,6 +208,8 @@ export default function ROITool() {
         @media (min-width: 900px) {
           .grid { grid-template-columns: 380px 1fr; align-items: start; }
         }
+        /* display:grid prend le pas sur l'attribut hidden sans cette règle. */
+        .grid[hidden] { display: none; }
 
         .panel {
           background: var(--panel);
@@ -374,6 +380,32 @@ export default function ROITool() {
           font-size: 12px;
           font-family: 'IBM Plex Mono', monospace;
         }
+
+        .onglets {
+          display: flex;
+          gap: 6px;
+          margin-bottom: 20px;
+        }
+        .onglets button {
+          background: transparent;
+          border: 1px solid var(--border);
+          color: var(--muted);
+          border-radius: 8px;
+          padding: 8px 15px;
+          font-family: inherit;
+          font-size: 13px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 7px;
+        }
+        .onglets button:hover { color: var(--text); }
+        .onglets button.actif {
+          color: var(--amber);
+          border-color: var(--amber);
+          background: rgba(232, 185, 58, 0.08);
+          font-weight: 600;
+        }
       `}</style>
 
       <div className="header">
@@ -381,12 +413,27 @@ export default function ROITool() {
           <div className="header-icon"><Car size={19} /></div>
           <div>
             <h1>Analyse ROI — Achat & location GetAround</h1>
-            <p>Simulez la rentabilité d'un véhicule mis en location</p>
+            <p>
+              {vue === "alcopa"
+                ? "Lots repérés sous leur prix de marché chez Alcopa Auction"
+                : "Simulez la rentabilité d'un véhicule mis en location"}
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="grid">
+      <div className="onglets">
+        <button className={vue === "roi" ? "actif" : ""} onClick={() => setVue("roi")}>
+          <Calculator size={14} /> Simulateur ROI
+        </button>
+        <button className={vue === "alcopa" ? "actif" : ""} onClick={() => setVue("alcopa")}>
+          <Gavel size={14} /> Bonnes affaires Alcopa
+        </button>
+      </div>
+
+      {vue === "alcopa" && <AlcopaDeals />}
+
+      <div className="grid" hidden={vue !== "roi"}>
         {/* ---------- INPUTS ---------- */}
         <div className="panel">
           <Section icon={<Car />} title="Achat comptant">
