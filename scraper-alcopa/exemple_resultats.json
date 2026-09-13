@@ -1,0 +1,109 @@
+{
+  "genere_le": "2026-09-13T20:44:05+00:00",
+  "source": "tests/fixture_cartes.html",
+  "nb_vehicules_collectes": 8,
+  "avertissement": "Les montants Alcopa sont des enchères en cours ou des mises à prix, pas des prix de vente finaux : une décote élevée sur un lot en 'mise_a_prix' reflète surtout une enchère qui n'a pas encore monté.",
+  "sections": [
+    {
+      "modele": "Volkswagen Polo",
+      "prix_moyen_marche": 15400,
+      "nb_lots_analyses": 0,
+      "nb_sous_prix_moyen": 0,
+      "top": []
+    },
+    {
+      "modele": "Renault Clio 4",
+      "prix_moyen_marche": 9500,
+      "nb_lots_analyses": 4,
+      "nb_sous_prix_moyen": 4,
+      "top": [
+        {
+          "marque": "RENAULT",
+          "modele": "CLIO IV",
+          "version": "CLIO IV 1.5 DCI 75",
+          "prix": 4500,
+          "type_prix": "mise_a_prix",
+          "kilometrage": 175000,
+          "annee": 2013,
+          "lieu": "Beauvais",
+          "date_vente": "14/09/2026",
+          "lot": "503",
+          "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-15-dci-75-1200003",
+          "id": "1200003",
+          "prix_moyen_marche": 9500,
+          "decote_pct": 52.6
+        },
+        {
+          "marque": "RENAULT",
+          "modele": "CLIO IV",
+          "version": "CLIO IV TCE 90 INTENS",
+          "prix": 7200,
+          "type_prix": "enchere_courante",
+          "kilometrage": 62000,
+          "annee": 2014,
+          "lieu": "Beauvais",
+          "date_vente": "14/09/2026",
+          "lot": "502",
+          "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-tce-90-1200002",
+          "id": "1200002",
+          "prix_moyen_marche": 9500,
+          "decote_pct": 24.2
+        },
+        {
+          "marque": "RENAULT",
+          "modele": "CLIO IV",
+          "version": "CLIO IV DCI 90 BUSINESS",
+          "prix": 7200,
+          "type_prix": "enchere_courante",
+          "kilometrage": 98000,
+          "annee": 2015,
+          "lieu": "Beauvais",
+          "date_vente": "14/09/2026",
+          "lot": "501",
+          "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-dci-90-1200001",
+          "id": "1200001",
+          "prix_moyen_marche": 9500,
+          "decote_pct": 24.2
+        }
+      ]
+    },
+    {
+      "modele": "Peugeot 208",
+      "prix_moyen_marche": 11500,
+      "nb_lots_analyses": 1,
+      "nb_sous_prix_moyen": 0,
+      "top": []
+    },
+    {
+      "modele": "Peugeot 2008",
+      "prix_moyen_marche": 13500,
+      "nb_lots_analyses": 1,
+      "nb_sous_prix_moyen": 1,
+      "top": [
+        {
+          "marque": "PEUGEOT",
+          "modele": "2008",
+          "version": "2008 BLUEHDI 100 ACTIVE",
+          "prix": 9900,
+          "type_prix": "mise_a_prix",
+          "kilometrage": 112000,
+          "annee": 2019,
+          "lieu": "Beauvais",
+          "date_vente": "14/09/2026",
+          "lot": "507",
+          "url": "https://www.alcopa-auction.fr/voiture-occasion/peugeot/2008-bluehdi-100-1200007",
+          "id": "1200007",
+          "prix_moyen_marche": 13500,
+          "decote_pct": 26.7
+        }
+      ]
+    },
+    {
+      "modele": "Ford Focus",
+      "prix_moyen_marche": 11000,
+      "nb_lots_analyses": 0,
+      "nb_sous_prix_moyen": 0,
+      "top": []
+    }
+  ]
+}
