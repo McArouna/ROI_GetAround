@@ -62,19 +62,58 @@ résultat indique lequel des deux vous regardez — c'est la donnée la plus imp
 du rapport. Les frais de vente ("Frais en sus") s'ajoutent par ailleurs au prix
 marteau et ne sont pas inclus ici.
 
-**2. Le prix moyen de référence est tous millésimes confondus.** Comparer une Clio 4
-de 2013 à 175 000 km à une moyenne qui inclut des modèles de 2019 surestime
-mécaniquement la décote. Le kilométrage et l'année figurent dans chaque résultat
-pour permettre cette relecture. Une pondération par âge/kilométrage serait
-l'amélioration la plus utile pour une v2.
+**2. La décote est calculée contre une référence ajustée, pas contre la moyenne brute.**
+Voir la section suivante : c'est ce qui distingue une vraie affaire d'un véhicule
+simplement vieux.
+
+## La pondération âge / kilométrage
+
+Un prix moyen "tous millésimes" compare une Clio 4 de 2013 à 175 000 km et une de
+2019 à 40 000 km à la même référence. Le scraper corrige donc le prix de référence
+pour chaque véhicule, en deux temps :
+
+1. **l'âge** — chaque année d'écart avec l'âge de référence du modèle applique le
+   taux de dépréciation annuel ;
+2. **le kilométrage** — seul l'écart au kilométrage *attendu pour cet âge*
+   (13 000 km/an par défaut) compte, sinon l'âge serait pénalisé deux fois.
+
+Le résultat est borné par un plancher et un plafond, tous deux exprimés en part du
+prix moyen. Le plafond n'est pas cosmétique : appliquer un taux de dépréciation
+constant à rebours surestime les véhicules récents. Sans lui, une Clio 4 de 2019 peu
+kilométrée obtenait une référence de 14 700 € — plus qu'une Polo moyenne — et tout
+lot en dessous serait passé pour une affaire.
+
+La correction joue **dans les deux sens**, et c'est là son intérêt :
+
+| Lot | Prix | Décote brute | Décote ajustée | Lecture |
+|---|---|---|---|---|
+| Clio 4 · 2013 · 175 000 km | 4 500 € | 52,6 % | **19,1 %** | fausse affaire dégonflée |
+| 208 · 2021 · 45 000 km | 12 800 € | **−11,3 %** | **9,3 %** | affaire que la moyenne brute ratait |
+
+Le second cas est le plus utile : ce lot est *au-dessus* des 11 500 € de moyenne
+tous millésimes, donc invisible pour une comparaison brute — alors qu'à millésime
+comparable c'est une bonne affaire.
+
+Chaque résultat conserve les deux lectures (`decote_pct` ajustée, `decote_brute_pct`)
+ainsi que le détail du calcul dans `ponderation`, pour qu'un classement surprenant
+puisse se vérifier.
+
+Les coefficients se règlent dans `PONDERATION` (`config.py`). Ce sont des ordres de
+grandeur du marché de l'occasion, pas des valeurs Argus : à affiner à l'usage.
+`"active": False` revient à la comparaison au prix moyen brut.
+
+`age_reference` se règle par modèle dans `MODELES_SUIVIS`, car il dépend de la
+génération : une Clio 4 (produite jusqu'en 2019) a un parc bien plus vieux qu'une
+Polo encore en production.
 
 ## Structure
 
 | Fichier | Rôle |
 |---|---|
-| `config.py` | Table des prix moyens, sélecteurs CSS, rythme de scraping |
+| `config.py` | Table des prix moyens, coefficients de pondération, sélecteurs CSS |
 | `parsing.py` | HTML → véhicules. Ne connaît pas le réseau, testable hors ligne |
-| `analyse.py` | Filtrage sous le prix moyen, classement, Top 3 |
+| `ponderation.py` | Prix de référence ajusté à l'âge et au kilométrage |
+| `analyse.py` | Filtrage sous la référence ajustée, classement, Top 3 |
 | `scraping.py` | Navigation Playwright, pagination, gestion des erreurs |
 | `main.py` | Ligne de commande, écriture JSON, résumé console |
 
@@ -92,8 +131,8 @@ Les tests s'appuient sur `tests/fixture_cartes.html`, dont la structure est calq
 sur une vraie page de salle de vente. Ils couvrent le parsing (dont le piège de
 l'année et du kilométrage qui fusionnent si l'on aplatit les `<br>`), la distinction
 enchère / mise à prix, la reconnaissance des modèles (`208` ne doit pas matcher
-`2008`, `CLIO III` ne doit pas passer pour une Clio 4) et les trois critères de
-classement.
+`2008`, `CLIO III` ne doit pas passer pour une Clio 4), les trois critères de
+classement, et les deux effets de la pondération décrits plus haut.
 
 ## Si le scraper ne remonte plus rien
 

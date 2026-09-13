@@ -6,8 +6,9 @@ Couche purement métier : elle ne sait pas d'où viennent les véhicules
 
 import re
 
-from config import MODELES_SUIVIS, TOP_N
+from config import MODELES_SUIVIS, PONDERATION, TOP_N
 from parsing import PRIX_MISE_A_PRIX
+from ponderation import prix_reference
 
 
 def identifier_modele(vehicule, modeles=MODELES_SUIVIS):
@@ -44,7 +45,7 @@ def _cle_de_tri(vehicule):
     )
 
 
-def selectionner_affaires(vehicules, modeles=MODELES_SUIVIS, top_n=TOP_N):
+def selectionner_affaires(vehicules, modeles=MODELES_SUIVIS, top_n=TOP_N, ponderation=PONDERATION):
     """Rend, pour chaque modèle suivi, les meilleures affaires sous le prix moyen.
 
     L'ordre des sections suit celui de la table de configuration.
@@ -59,12 +60,22 @@ def selectionner_affaires(vehicules, modeles=MODELES_SUIVIS, top_n=TOP_N):
 
         total_analyses[modele["nom"]] += 1
         prix = vehicule.get("prix")
-        if prix is None or prix >= modele["prix_moyen"]:
+        if prix is None:
+            continue
+
+        # La référence est ajustée à l'âge et au kilométrage de ce véhicule :
+        # c'est elle qui décide, pas la moyenne brute du modèle. Une vieille
+        # Clio 4 très kilométrée sous les 9 500 € n'est pas une affaire.
+        reference, detail = prix_reference(vehicule, modele, ponderation)
+        if prix >= reference:
             continue
 
         retenu = dict(vehicule)
         retenu["prix_moyen_marche"] = modele["prix_moyen"]
-        retenu["decote_pct"] = calculer_decote(prix, modele["prix_moyen"])
+        retenu["prix_reference_ajuste"] = reference
+        retenu["decote_pct"] = calculer_decote(prix, reference)
+        retenu["decote_brute_pct"] = calculer_decote(prix, modele["prix_moyen"])
+        retenu["ponderation"] = detail
         par_modele[modele["nom"]].append(retenu)
 
     sections = []
@@ -74,19 +85,22 @@ def selectionner_affaires(vehicules, modeles=MODELES_SUIVIS, top_n=TOP_N):
             {
                 "modele": modele["nom"],
                 "prix_moyen_marche": modele["prix_moyen"],
+                "age_reference": modele.get("age_reference"),
                 "nb_lots_analyses": total_analyses[modele["nom"]],
-                "nb_sous_prix_moyen": len(trouves),
+                "nb_sous_reference": len(trouves),
                 "top": trouves[:top_n],
             }
         )
     return sections
 
 
-def construire_resultats(vehicules, source, modeles=MODELES_SUIVIS, top_n=TOP_N):
+def construire_resultats(
+    vehicules, source, modeles=MODELES_SUIVIS, top_n=TOP_N, ponderation=PONDERATION
+):
     """Assemble le document final, prêt à être sérialisé en JSON."""
     from datetime import datetime, timezone
 
-    sections = selectionner_affaires(vehicules, modeles, top_n)
+    sections = selectionner_affaires(vehicules, modeles, top_n, ponderation)
 
     return {
         "genere_le": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -95,7 +109,13 @@ def construire_resultats(vehicules, source, modeles=MODELES_SUIVIS, top_n=TOP_N)
         "avertissement": (
             "Les montants Alcopa sont des enchères en cours ou des mises à prix, "
             "pas des prix de vente finaux : une décote élevée sur un lot en "
-            f"'{PRIX_MISE_A_PRIX}' reflète surtout une enchère qui n'a pas encore monté."
+            f"'{PRIX_MISE_A_PRIX}' reflète surtout une enchère qui n'a pas encore monté. "
+            "Les frais de vente s'ajoutent au prix marteau et ne sont pas comptés ici."
+        ),
+        "methode_decote": (
+            "decote_pct compare le prix au prix de référence ajusté à l'âge et au "
+            "kilométrage du véhicule. decote_brute_pct le compare au prix moyen du "
+            "modèle, tous millésimes confondus."
         ),
         "sections": sections,
     }

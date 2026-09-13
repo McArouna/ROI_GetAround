@@ -1,21 +1,24 @@
 {
-  "genere_le": "2026-09-13T20:44:05+00:00",
+  "genere_le": "2026-09-13T20:52:51+00:00",
   "source": "tests/fixture_cartes.html",
   "nb_vehicules_collectes": 8,
-  "avertissement": "Les montants Alcopa sont des enchères en cours ou des mises à prix, pas des prix de vente finaux : une décote élevée sur un lot en 'mise_a_prix' reflète surtout une enchère qui n'a pas encore monté.",
+  "avertissement": "Les montants Alcopa sont des enchères en cours ou des mises à prix, pas des prix de vente finaux : une décote élevée sur un lot en 'mise_a_prix' reflète surtout une enchère qui n'a pas encore monté. Les frais de vente s'ajoutent au prix marteau et ne sont pas comptés ici.",
+  "methode_decote": "decote_pct compare le prix au prix de référence ajusté à l'âge et au kilométrage du véhicule. decote_brute_pct le compare au prix moyen du modèle, tous millésimes confondus.",
   "sections": [
     {
       "modele": "Volkswagen Polo",
       "prix_moyen_marche": 15400,
+      "age_reference": 4,
       "nb_lots_analyses": 0,
-      "nb_sous_prix_moyen": 0,
+      "nb_sous_reference": 0,
       "top": []
     },
     {
       "modele": "Renault Clio 4",
       "prix_moyen_marche": 9500,
+      "age_reference": 9,
       "nb_lots_analyses": 4,
-      "nb_sous_prix_moyen": 4,
+      "nb_sous_reference": 4,
       "top": [
         {
           "marque": "RENAULT",
@@ -31,23 +34,18 @@
           "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-15-dci-75-1200003",
           "id": "1200003",
           "prix_moyen_marche": 9500,
-          "decote_pct": 52.6
-        },
-        {
-          "marque": "RENAULT",
-          "modele": "CLIO IV",
-          "version": "CLIO IV TCE 90 INTENS",
-          "prix": 7200,
-          "type_prix": "enchere_courante",
-          "kilometrage": 62000,
-          "annee": 2014,
-          "lieu": "Beauvais",
-          "date_vente": "14/09/2026",
-          "lot": "502",
-          "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-tce-90-1200002",
-          "id": "1200002",
-          "prix_moyen_marche": 9500,
-          "decote_pct": 24.2
+          "prix_reference_ajuste": 5560,
+          "decote_pct": 19.1,
+          "decote_brute_pct": 52.6,
+          "ponderation": {
+            "ponderation_appliquee": true,
+            "age": 13,
+            "age_reference": 9,
+            "km_attendu": 169000,
+            "ecart_km": 6000,
+            "facteur_age": 0.6,
+            "facteur_km": 0.976
+          }
         },
         {
           "marque": "RENAULT",
@@ -63,22 +61,90 @@
           "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-dci-90-1200001",
           "id": "1200001",
           "prix_moyen_marche": 9500,
-          "decote_pct": 24.2
+          "prix_reference_ajuste": 8681,
+          "decote_pct": 17.1,
+          "decote_brute_pct": 24.2,
+          "ponderation": {
+            "ponderation_appliquee": true,
+            "age": 11,
+            "age_reference": 9,
+            "km_attendu": 143000,
+            "ecart_km": -45000,
+            "facteur_age": 0.774,
+            "facteur_km": 1.18
+          }
+        },
+        {
+          "marque": "RENAULT",
+          "modele": "CLIO IV",
+          "version": "CLIO IV TCE 90 INTENS",
+          "prix": 7200,
+          "type_prix": "enchere_courante",
+          "kilometrage": 62000,
+          "annee": 2014,
+          "lieu": "Beauvais",
+          "date_vente": "14/09/2026",
+          "lot": "502",
+          "url": "https://www.alcopa-auction.fr/voiture-occasion/renault/clio-iv-tce-90-1200002",
+          "id": "1200002",
+          "prix_moyen_marche": 9500,
+          "prix_reference_ajuste": 7769,
+          "decote_pct": 7.3,
+          "decote_brute_pct": 24.2,
+          "ponderation": {
+            "ponderation_appliquee": true,
+            "age": 12,
+            "age_reference": 9,
+            "km_attendu": 156000,
+            "ecart_km": -94000,
+            "facteur_age": 0.681,
+            "facteur_km": 1.2
+          }
         }
       ]
     },
     {
       "modele": "Peugeot 208",
       "prix_moyen_marche": 11500,
+      "age_reference": 6,
       "nb_lots_analyses": 1,
-      "nb_sous_prix_moyen": 0,
-      "top": []
+      "nb_sous_reference": 1,
+      "top": [
+        {
+          "marque": "PEUGEOT",
+          "modele": "208",
+          "version": "208 PURETECH 100 ALLURE",
+          "prix": 12800,
+          "type_prix": "enchere_courante",
+          "kilometrage": 45000,
+          "annee": 2021,
+          "lieu": "Beauvais",
+          "date_vente": "14/09/2026",
+          "lot": "506",
+          "url": "https://www.alcopa-auction.fr/voiture-occasion/peugeot/208-puretech-100-1200006",
+          "id": "1200006",
+          "prix_moyen_marche": 11500,
+          "prix_reference_ajuste": 14114,
+          "decote_pct": 9.3,
+          "decote_brute_pct": -11.3,
+          "ponderation": {
+            "ponderation_appliquee": true,
+            "age": 5,
+            "age_reference": 6,
+            "km_attendu": 65000,
+            "ecart_km": -20000,
+            "facteur_age": 1.136,
+            "facteur_km": 1.08
+          }
+        }
+      ]
     },
     {
       "modele": "Peugeot 2008",
       "prix_moyen_marche": 13500,
+      "age_reference": 6,
       "nb_lots_analyses": 1,
-      "nb_sous_prix_moyen": 1,
+      "nb_sous_reference": 1,
       "top": [
         {
           "marque": "PEUGEOT",
@@ -94,15 +160,27 @@
           "url": "https://www.alcopa-auction.fr/voiture-occasion/peugeot/2008-bluehdi-100-1200007",
           "id": "1200007",
           "prix_moyen_marche": 13500,
-          "decote_pct": 26.7
+          "prix_reference_ajuste": 10882,
+          "decote_pct": 9.0,
+          "decote_brute_pct": 26.7,
+          "ponderation": {
+            "ponderation_appliquee": true,
+            "age": 7,
+            "age_reference": 6,
+            "km_attendu": 91000,
+            "ecart_km": 21000,
+            "facteur_age": 0.88,
+            "facteur_km": 0.916
+          }
         }
       ]
     },
     {
       "modele": "Ford Focus",
       "prix_moyen_marche": 11000,
+      "age_reference": 6,
       "nb_lots_analyses": 0,
-      "nb_sous_prix_moyen": 0,
+      "nb_sous_reference": 0,
       "top": []
     }
   ]

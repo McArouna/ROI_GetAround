@@ -29,7 +29,7 @@ def afficher_resume(resultats):
         print(f"--- {section['modele']} (moyenne marché : {section['prix_moyen_marche']} €)")
         print(
             f"    {section['nb_lots_analyses']} lot(s) de ce modèle, "
-            f"{section['nb_sous_prix_moyen']} sous le prix moyen"
+            f"{section['nb_sous_reference']} sous la référence ajustée"
         )
 
         if not section["top"]:
@@ -45,6 +45,11 @@ def afficher_resume(resultats):
             print(
                 f"       {vehicule['kilometrage']} km · {vehicule['annee']} · "
                 f"{vehicule['lieu']} · vente {vehicule['date_vente']}"
+            )
+            print(
+                f"       référence ajustée {vehicule['prix_reference_ajuste']} € "
+                f"(moyenne brute {vehicule['prix_moyen_marche']} € · "
+                f"décote brute {vehicule['decote_brute_pct']} %)"
             )
             print(f"       {vehicule['url']}")
         print()
