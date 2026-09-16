@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarificateur PowerBody — EUR / DA</title>
+<style>
+  :root{
+    --bg:#12151A; --panneau:#191E26; --panneau2:#1F2630; --bord:#2B333F;
+    --texte:#E8ECF2; --doux:#95A2B3; --accent:#4ADE80; --accent2:#38BDF8;
+    --alerte:#F87171; --jaune:#FBBF24;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--texte);
+       font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .enveloppe{max-width:1280px;margin:0 auto;padding:24px 16px 64px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sous{color:var(--doux);font-size:13px;margin:0 0 20px}
+  .carte{background:var(--panneau);border:1px solid var(--bord);border-radius:12px;padding:16px;margin-bottom:16px}
+  .reglages{position:sticky;top:0;z-index:5;backdrop-filter:blur(8px)}
+  .grille{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(165px,1fr))}
+  label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--doux);margin-bottom:5px}
+  input,select{width:100%;background:var(--panneau2);border:1px solid var(--bord);color:var(--texte);
+       border-radius:8px;padding:8px 10px;font-size:14px;font-variant-numeric:tabular-nums}
+  input:focus,select:focus{outline:none;border-color:var(--accent2)}
+  input[type=range]{padding:0;border:0;background:transparent;accent-color:var(--accent)}
+  .ligne-case{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-top:14px;color:var(--doux);font-size:13px}
+  .ligne-case label{display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-size:13px;margin:0;cursor:pointer}
+  .ligne-case input[type=checkbox]{width:auto;accent-color:var(--accent)}
+  .stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .stat{background:var(--panneau2);border:1px solid var(--bord);border-radius:10px;padding:12px}
+  .stat .k{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--doux)}
+  .stat .v{font-size:19px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
+  .vert{color:var(--accent)} .bleu{color:var(--accent2)} .rouge{color:var(--alerte)}
+  .jaune{color:var(--jaune)} .doux{color:var(--doux)}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:9px 10px;border-bottom:1px solid var(--bord);text-align:right;white-space:nowrap}
+  th{position:sticky;top:0;background:var(--panneau);font-size:11px;text-transform:uppercase;
+     letter-spacing:.05em;color:var(--doux);cursor:pointer;user-select:none;z-index:2}
+  th:hover{color:var(--texte)}
+  th.g,td.g{text-align:left;white-space:normal}
+  td.nom{max-width:340px}
+  td.nom a{color:var(--texte);text-decoration:none}
+  td.nom a:hover{color:var(--accent2);text-decoration:underline}
+  .tableau{overflow:auto;max-height:66vh;border:1px solid var(--bord);border-radius:12px;background:var(--panneau)}
+  tr.rupture{opacity:.45}
+  td input{width:96px;padding:4px 6px;text-align:right;font-size:13px}
+  .puce{font-size:11px;padding:2px 7px;border-radius:99px;background:var(--panneau2);color:var(--doux)}
+  .puce.ok{color:var(--accent)} .puce.ko{color:var(--alerte)}
+  button{background:var(--panneau2);border:1px solid var(--bord);color:var(--texte);
+         border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer}
+  button:hover{border-color:var(--accent2)}
+  button.primaire{background:var(--accent);border-color:var(--accent);color:#07120B;font-weight:600}
+  .barre{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .depot{border:2px dashed var(--bord);border-radius:12px;padding:40px 20px;text-align:center;color:var(--doux)}
+  .depot.survol{border-color:var(--accent);color:var(--texte)}
+  code{background:var(--panneau2);padding:2px 6px;border-radius:5px;font-size:12px;color:var(--accent2)}
+  @media (max-width:640px){td.nom{max-width:180px}.enveloppe{padding:16px 12px 48px}}
+</style>
+</head>
+<body>
+<div class="enveloppe">
+  <h1>Tarificateur PowerBody</h1>
+  <p class="sous">Prix d'achat en euros → prix de vente en dinars. <span id="meta"></span></p>
+
+  <div class="carte reglages">
+    <div class="grille">
+      <div>
+        <label for="taux">Taux EUR → DA</label>
+        <input id="taux" type="number" step="1" min="1" value="280">
+        <input id="tauxRange" type="range" min="150" max="400" step="1" value="280" style="margin-top:8px">
+      </div>
+      <div>
+        <label for="mode">Marge exprimée en</label>
+        <select id="mode">
+          <option value="da">Dinars par produit</option>
+          <option value="pct">% du prix de revient</option>
+          <option value="eur">Euros par produit</option>
+        </select>
+      </div>
+      <div>
+        <label for="marge">Marge voulue <span id="uniteMarge">(DA)</span></label>
+        <input id="marge" type="number" step="50" value="500">
+        <input id="margeRange" type="range" min="0" max="5000" step="50" value="500" style="margin-top:8px">
+      </div>
+      <div>
+        <label for="frais">Frais par produit (DA)</label>
+        <input id="frais" type="number" step="50" min="0" value="0">
+      </div>
+      <div>
+        <label for="arrondi">Arrondi du prix de vente</label>
+        <select id="arrondi">
+          <option value="0">Aucun</option>
+          <option value="10">10 DA</option>
+          <option value="50" selected>50 DA</option>
+          <option value="100">100 DA</option>
+          <option value="500">500 DA</option>
+        </select>
+      </div>
+      <div>
+        <label for="recherche">Rechercher</label>
+        <input id="recherche" type="search" placeholder="vitamine, whey, zma…">
+      </div>
+    </div>
+    <div class="ligne-case">
+      <label><input type="checkbox" id="masquerRupture"> Masquer les ruptures de stock</label>
+      <label><input type="checkbox" id="afficherQte"> Colonne quantité (simulation de commande)</label>
+      <span id="compteur"></span>
+    </div>
+  </div>
+
+  <div class="carte stats" id="stats"></div>
+
+  <div id="zoneVide" class="carte depot" hidden>
+    <p style="margin:0 0 8px;font-size:15px;color:var(--texte)">Aucune donnée chargée</p>
+    <p style="margin:0 0 16px">Glissez ici <code>produits.json</code> (ou <code>donnees.js</code>, ou le CSV) produit par <code>extraire.py</code>.</p>
+    <button id="btnFichier" class="primaire">Choisir un fichier</button>
+    <input id="fichier" type="file" accept=".json,.js,.csv" hidden>
+  </div>
+
+  <div class="tableau" id="zoneTableau" hidden>
+    <table>
+      <thead><tr id="entetes"></tr></thead>
+      <tbody id="corps"></tbody>
+    </table>
+  </div>
+
+  <div class="barre">
+    <button id="btnCsv">Exporter le tableau (CSV)</button>
+    <button id="btnCharger">Charger un autre fichier</button>
+    <button id="btnReset">Réinitialiser les prix modifiés</button>
+  </div>
+</div>
+
+<script src="export/donnees.js" onerror="window.PB_EXPORT=window.PB_EXPORT||null"></script>
+<script>
+(function(){
+  "use strict";
+
+  // ---------- état ----------
+  var produits = [], reglages = {}, forces = {}, quantites = {}, tri = {cle:"nom", sens:1};
+
+  var nf = function(n, d){
+    if (n === null || n === undefined || isNaN(n)) return "—";
+    return n.toLocaleString("fr-FR", {minimumFractionDigits:d||0, maximumFractionDigits:d||0});
+  };
+  var da = function(n){ return nf(n,0) + " DA"; };
+  var eur = function(n){ return nf(n,2) + " €"; };
+
+  var $ = function(id){ return document.getElementById(id); };
+  var memo = {
+    lire: function(cle, defaut){
+      try { var v = localStorage.getItem("pb_"+cle); return v === null ? defaut : JSON.parse(v); }
+      catch(e){ return defaut; }
+    },
+    ecrire: function(cle, valeur){
+      try { localStorage.setItem("pb_"+cle, JSON.stringify(valeur)); } catch(e){}
+    }
+  };
+
+  // ---------- calcul (identique à tarifs.py) ----------
+  function arrondirSup(valeur, pas){
+    if (!pas || pas <= 0) return valeur;
+    return Math.ceil(valeur / pas) * pas;
+  }
+
+  function calculer(prixEur, p){
+    var r = params();
+    var achat = prixEur * r.taux;
+    var revient = achat + r.frais;
+    var vente;
+    var force = forces[cle(p)];
+    if (force !== undefined && force !== null && force !== ""){
+      vente = Number(force);
+    } else if (r.mode === "pct"){
+      vente = arrondirSup(revient * (1 + r.marge/100), r.arrondi);
+    } else if (r.mode === "eur"){
+      vente = arrondirSup(revient + r.marge * r.taux, r.arrondi);
+    } else {
+      vente = arrondirSup(revient + r.marge, r.arrondi);
+    }
+    var margeDa = vente - revient;
+    return {
+      achat: achat, revient: revient, vente: vente, margeDa: margeDa,
+      margePct: revient ? margeDa / revient * 100 : 0,
+      force: force !== undefined && force !== null && force !== ""
+    };
+  }
+
+  function params(){
+    return {
+      taux: Number($("taux").value) || 280,
+      mode: $("mode").value,
+      marge: Number($("marge").value) || 0,
+      frais: Number($("frais").value) || 0,
+      arrondi: Number($("arrondi").value) || 0
+    };
+  }
+
+  function cle(p){ return (p.url || p.nom || "").toLowerCase(); }
+  function enRupture(p){ return /rupture|indisponible/i.test(p.dispo || ""); }
+
+  // ---------- tableau ----------
+  var COLONNES = [
+    {cle:"nom",       titre:"Produit",    g:true, val:function(p){ return p.nom; }},
+    {cle:"dispo",     titre:"Dispo",      g:true, val:function(p){ return p.dispo; }},
+    {cle:"prix_eur",  titre:"Achat €",    val:function(p){ return p.prix_eur; }},
+    {cle:"achat",     titre:"Achat DA",   val:function(p){ return calculer(p.prix_eur,p).achat; }},
+    {cle:"revient",   titre:"Revient DA", val:function(p){ return calculer(p.prix_eur,p).revient; }},
+    {cle:"vente",     titre:"Vente DA",   val:function(p){ return calculer(p.prix_eur,p).vente; }},
+    {cle:"margeDa",   titre:"Marge DA",   val:function(p){ return calculer(p.prix_eur,p).margeDa; }},
+    {cle:"margePct",  titre:"Marge %",    val:function(p){ return calculer(p.prix_eur,p).margePct; }},
+    {cle:"qte",       titre:"Qté",        val:function(p){ return quantites[cle(p)] || 0; }}
+  ];
+
+  function visibles(){
+    var q = ($("recherche").value || "").toLowerCase().trim();
+    var masquer = $("masquerRupture").checked;
+    var liste = produits.filter(function(p){
+      if (!p.prix_eur) return false;
+      if (masquer && enRupture(p)) return false;
+      if (q && (p.nom || "").toLowerCase().indexOf(q) === -1 &&
+               (p.sku || "").toLowerCase().indexOf(q) === -1) return false;
+      return true;
+    });
+    var col = COLONNES.filter(function(c){ return c.cle === tri.cle; })[0] || COLONNES[0];
+    liste.sort(function(a,b){
+      var va = col.val(a), vb = col.val(b);
+      if (typeof va === "string" || typeof vb === "string"){
+        return String(va||"").localeCompare(String(vb||""), "fr") * tri.sens;
+      }
+      return ((va||0) - (vb||0)) * tri.sens;
+    });
+    return liste;
+  }
+
+  function dessiner(){
+    var avecQte = $("afficherQte").checked;
+    var cols = COLONNES.filter(function(c){ return c.cle !== "qte" || avecQte; });
+
+    $("entetes").innerHTML = cols.map(function(c){
+      var fleche = tri.cle === c.cle ? (tri.sens > 0 ? " ▲" : " ▼") : "";
+      return '<th class="' + (c.g ? "g" : "") + '" data-cle="' + c.cle + '">' + c.titre + fleche + '</th>';
+    }).join("");
+
+    var liste = visibles();
+    $("corps").innerHTML = liste.map(function(p){
+      var c = calculer(p.prix_eur, p);
+      var k = cle(p);
+      var tds = cols.map(function(col){
+        switch(col.cle){
+          case "nom":
+            var lien = p.url ? '<a href="' + p.url + '" target="_blank" rel="noopener">' + echapper(p.nom) + '</a>'
+                             : echapper(p.nom);
+            return '<td class="g nom">' + lien + (p.sku ? ' <span class="puce">' + echapper(p.sku) + '</span>' : '') + '</td>';
+          case "dispo":
+            var cls = enRupture(p) ? "ko" : (p.dispo ? "ok" : "");
+            return '<td class="g"><span class="puce ' + cls + '">' + echapper(p.dispo || "—") + '</span></td>';
+          case "prix_eur":
+            var barre = p.prix_barre_eur ? ' <span class="puce">−' +
+                  nf((1 - p.prix_eur / p.prix_barre_eur) * 100, 0) + '%</span>' : '';
+            return '<td>' + eur(p.prix_eur) + barre + '</td>';
+          case "achat":   return '<td>' + da(c.achat) + '</td>';
+          case "revient": return '<td>' + da(c.revient) + '</td>';
+          case "vente":
+            return '<td><input type="number" step="10" data-role="vente" data-cle="' + echapper(k) + '" value="' +
+                   Math.round(c.vente) + '"' + (c.force ? ' class="jaune"' : '') + '></td>';
+          case "margeDa":  return '<td class="' + (c.margeDa >= 0 ? "vert" : "rouge") + '">' + da(c.margeDa) + '</td>';
+          case "margePct": return '<td class="' + (c.margePct >= 0 ? "vert" : "rouge") + '">' + nf(c.margePct,1) + ' %</td>';
+          case "qte":
+            return '<td><input type="number" step="1" min="0" data-role="qte" data-cle="' + echapper(k) +
+                   '" value="' + (quantites[k] || 0) + '"></td>';
+        }
+        return '<td></td>';
+      }).join("");
+      return '<tr class="' + (enRupture(p) ? "rupture" : "") + '">' + tds + '</tr>';
+    }).join("");
+
+    $("compteur").textContent = liste.length + " / " + produits.length + " produits affichés";
+    statistiques(liste);
+    $("zoneTableau").hidden = produits.length === 0;
+    $("zoneVide").hidden = produits.length > 0;
+  }
+
+  function statistiques(liste){
+    var avecQte = $("afficherQte").checked;
+    var totalAchat = 0, totalVente = 0, totalMarge = 0, unites = 0, pcts = [];
+    liste.forEach(function(p){
+      var c = calculer(p.prix_eur, p);
+      var q = avecQte ? (quantites[cle(p)] || 0) : 1;
+      unites += q;
+      totalAchat += c.revient * q;
+      totalVente += c.vente * q;
+      totalMarge += c.margeDa * q;
+      pcts.push(c.margePct);
+    });
+    var moyenne = pcts.length ? pcts.reduce(function(a,b){ return a+b; },0) / pcts.length : 0;
+    var r = params();
+    var cartes = [
+      ["Produits", avecQte ? nf(unites) + " unités" : nf(liste.length), "bleu"],
+      ["Coût total", da(totalAchat), ""],
+      ["Coût total en euros", eur(totalAchat / r.taux), "doux"],
+      ["Recette", da(totalVente), ""],
+      ["Marge totale", da(totalMarge), totalMarge >= 0 ? "vert" : "rouge"],
+      ["Marge moyenne", nf(moyenne,1) + " %", moyenne >= 0 ? "vert" : "rouge"]
+    ];
+    $("stats").innerHTML = cartes.map(function(c){
+      return '<div class="stat"><div class="k">' + c[0] + '</div><div class="v ' + c[2] + '">' + c[1] + '</div></div>';
+    }).join("");
+  }
+
+  function echapper(s){
+    return String(s === null || s === undefined ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  // ---------- chargement des données ----------
+  function adopter(charge){
+    if (!charge) return;
+    produits = charge.produits || charge;
+    reglages = charge.reglages || {};
+    if (reglages.taux){ $("taux").value = reglages.taux; $("tauxRange").value = reglages.taux; }
+    if (reglages.mode) $("mode").value = reglages.mode;
+    if (reglages.marge !== undefined){ $("marge").value = reglages.marge; $("margeRange").value = reglages.marge; }
+    if (reglages.frais !== undefined) $("frais").value = reglages.frais;
+    if (reglages.arrondi !== undefined) $("arrondi").value = String(reglages.arrondi);
+    $("meta").textContent = produits.length + " produits" +
+      (reglages.extrait_le ? " · extraits le " + reglages.extrait_le : "");
+    memo.ecrire("produits", produits);
+    majUnite();
+    dessiner();
+  }
+
+  function lireCsv(texte){
+    var lignes = texte.replace(/^﻿/, "").split(/\r?\n/).filter(function(l){ return l.trim(); });
+    if (!lignes.length) return [];
+    var sep = (lignes[0].split(";").length > lignes[0].split(",").length) ? ";" : ",";
+    var entetes = lignes[0].split(sep).map(function(h){ return h.trim().toLowerCase(); });
+    var iNom = trouver(entetes, ["produit","nom","name"]);
+    var iEur = trouver(entetes, ["achat eur","prix_eur","prix","price"]);
+    var iSku = trouver(entetes, ["réf.","ref","sku"]);
+    var iDispo = trouver(entetes, ["dispo","disponibilité","stock"]);
+    var iUrl = trouver(entetes, ["lien","url"]);
+    return lignes.slice(1).map(function(l){
+      var c = l.split(sep);
+      return {
+        nom: (c[iNom] || "").trim(),
+        sku: iSku >= 0 ? (c[iSku] || "").trim() : "",
+        dispo: iDispo >= 0 ? (c[iDispo] || "").trim() : "",
+        url: iUrl >= 0 ? (c[iUrl] || "").trim() : "",
+        prix_eur: parseFloat(String(c[iEur] || "").replace(/[^\d.,-]/g,"").replace(",", ".")) || null
+      };
+    }).filter(function(p){ return p.nom && p.prix_eur; });
+  }
+
+  function trouver(entetes, noms){
+    for (var i = 0; i < entetes.length; i++){
+      for (var j = 0; j < noms.length; j++){
+        if (entetes[i].indexOf(noms[j]) !== -1) return i;
+      }
+    }
+    return -1;
+  }
+
+  function lireFichier(fichier){
+    var lecteur = new FileReader();
+    lecteur.onload = function(){
+      var texte = String(lecteur.result);
+      try {
+        if (/\.csv$/i.test(fichier.name)) { adopter({produits: lireCsv(texte)}); return; }
+        var json = texte.replace(/^\s*window\.PB_EXPORT\s*=\s*/, "").replace(/;\s*$/, "");
+        adopter(JSON.parse(json));
+      } catch(e){
+        alert("Fichier illisible : " + e.message);
+      }
+    };
+    lecteur.readAsText(fichier);
+  }
+
+  // ---------- interactions ----------
+  function majUnite(){
+    var m = $("mode").value;
+    $("uniteMarge").textContent = m === "pct" ? "(%)" : (m === "eur" ? "(€)" : "(DA)");
+    var r = $("margeRange");
+    if (m === "pct"){ r.max = 200; r.step = 5; }
+    else if (m === "eur"){ r.max = 50; r.step = 1; }
+    else { r.max = 5000; r.step = 50; }
+    r.value = Math.min(Number($("marge").value) || 0, Number(r.max));
+  }
+
+  function sauverReglages(){
+    memo.ecrire("reglages", params());
+    memo.ecrire("forces", forces);
+    memo.ecrire("quantites", quantites);
+  }
+
+  ["taux","marge","frais","arrondi","mode","recherche","masquerRupture","afficherQte"].forEach(function(id){
+    $(id).addEventListener("input", function(){
+      if (id === "taux") $("tauxRange").value = $("taux").value;
+      if (id === "marge") $("margeRange").value = $("marge").value;
+      if (id === "mode") majUnite();
+      sauverReglages();
+      dessiner();
+    });
+  });
+  $("tauxRange").addEventListener("input", function(){ $("taux").value = this.value; sauverReglages(); dessiner(); });
+  $("margeRange").addEventListener("input", function(){ $("marge").value = this.value; sauverReglages(); dessiner(); });
+
+  $("entetes").addEventListener("click", function(e){
+    var th = e.target.closest("th");
+    if (!th) return;
+    var k = th.getAttribute("data-cle");
+    tri = (tri.cle === k) ? {cle:k, sens:-tri.sens} : {cle:k, sens: k === "nom" ? 1 : -1};
+    dessiner();
+  });
+
+  $("corps").addEventListener("change", function(e){
+    var champ = e.target;
+    var k = champ.getAttribute("data-cle");
+    if (!k) return;
+    if (champ.getAttribute("data-role") === "vente") forces[k] = champ.value;
+    else quantites[k] = Number(champ.value) || 0;
+    sauverReglages();
+    dessiner();
+  });
+
+  $("btnReset").addEventListener("click", function(){
+    forces = {}; quantites = {};
+    sauverReglages();
+    dessiner();
+  });
+
+  $("btnCsv").addEventListener("click", function(){
+    var avecQte = $("afficherQte").checked;
+    var entetes = ["Produit","Réf.","Dispo","Achat EUR","Achat DA","Revient DA","Vente DA","Marge DA","Marge %"];
+    if (avecQte) entetes.push("Qté","Marge totale DA");
+    var lignes = [entetes.join(";")];
+    visibles().forEach(function(p){
+      var c = calculer(p.prix_eur, p), q = quantites[cle(p)] || 0;
+      var l = [p.nom, p.sku || "", p.dispo || "",
+               virgule(p.prix_eur,2), virgule(c.achat,0), virgule(c.revient,0),
+               virgule(c.vente,0), virgule(c.margeDa,0), virgule(c.margePct,1)];
+      if (avecQte) l.push(q, virgule(c.margeDa * q, 0));
+      lignes.push(l.map(function(v){ return String(v).replace(/;/g, ","); }).join(";"));
+    });
+    telecharger("tarifs_powerbody.csv", "﻿" + lignes.join("\n"));
+  });
+
+  function virgule(n, d){ return (Math.round((n||0) * Math.pow(10,d)) / Math.pow(10,d)).toFixed(d).replace(".", ","); }
+
+  function telecharger(nom, contenu){
+    var blob = new Blob([contenu], {type:"text/csv;charset=utf-8"});
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = nom;
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+  }
+
+  $("btnFichier").addEventListener("click", function(){ $("fichier").click(); });
+  $("btnCharger").addEventListener("click", function(){ $("fichier").click(); });
+  $("fichier").addEventListener("change", function(){ if (this.files[0]) lireFichier(this.files[0]); });
+
+  ["dragenter","dragover"].forEach(function(ev){
+    document.addEventListener(ev, function(e){ e.preventDefault(); $("zoneVide").classList.add("survol"); });
+  });
+  ["dragleave","drop"].forEach(function(ev){
+    document.addEventListener(ev, function(e){ e.preventDefault(); $("zoneVide").classList.remove("survol"); });
+  });
+  document.addEventListener("drop", function(e){
+    if (e.dataTransfer && e.dataTransfer.files[0]) lireFichier(e.dataTransfer.files[0]);
+  });
+
+  // ---------- démarrage ----------
+  var sauve = memo.lire("reglages", null);
+  if (sauve){
+    $("taux").value = sauve.taux; $("tauxRange").value = sauve.taux;
+    $("mode").value = sauve.mode;
+    $("marge").value = sauve.marge; $("margeRange").value = sauve.marge;
+    $("frais").value = sauve.frais;
+    $("arrondi").value = String(sauve.arrondi);
+  }
+  forces = memo.lire("forces", {}) || {};
+  quantites = memo.lire("quantites", {}) || {};
+  majUnite();
+
+  if (window.PB_EXPORT) adopter(window.PB_EXPORT);
+  else {
+    var cache = memo.lire("produits", null);
+    if (cache && cache.length){ produits = cache; $("meta").textContent = produits.length + " produits (mémorisés)"; }
+    dessiner();
+  }
+})();
+</script>
+</body>
+</html>

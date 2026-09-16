@@ -33,3 +33,12 @@ npm install
 npm run dev
 ```
 Puis ouvre http://localhost:5173
+
+---
+
+## Outil annexe : tarificateur PowerBody
+
+`powerbody/` contient un second outil, indépendant de l'analyse ROI : il extrait les
+produits et prix d'achat de PowerBody (compte connecté), les convertit en dinars
+(1 € = 280 DA par défaut) et calcule le prix de vente selon la marge voulue.
+Voir [powerbody/README.md](powerbody/README.md).

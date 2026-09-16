@@ -1,2 +1,8 @@
 node_modules/
 dist/
+
+# outil powerbody : identifiants, session et données extraites
+powerbody/.env
+powerbody/session.json
+powerbody/export/
+__pycache__/
