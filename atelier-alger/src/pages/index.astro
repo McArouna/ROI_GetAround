@@ -4,10 +4,12 @@ import Visuel from '../components/Visuel.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { brand } from '../data/brand';
 import { produitsVedette, products } from '../data/products';
+import { photosDabord } from '../lib/images';
 import { artisans } from '../data/artisans';
 
-const vignettes = produitsVedette.slice(0, 3);
-const grille = produitsVedette.slice(0, 8);
+const misesEnAvant = photosDabord(produitsVedette);
+const vignettes = misesEnAvant.slice(0, 3);
+const grille = misesEnAvant.slice(0, 8);
 const nombreArtisans = artisans.length;
 
 const valeurs = [
@@ -52,7 +54,7 @@ const valeurs = [
           <p class="mt-6 max-w-md text-base leading-relaxed text-lin/80">
             {brand.accroche}
           </p>
-          <p class="arabe mt-3 text-xl text-lin/70">{brand.baselineArabe}</p>
+          <p class="arabe mt-3 max-w-md text-xl text-lin/70">{brand.baselineArabe}</p>
 
           <div class="mt-8 flex flex-wrap items-center gap-3">
             <a href="/collection" class="btn btn-primaire">Voir la collection</a>
@@ -83,9 +85,9 @@ const valeurs = [
         <div class="lg:pb-2">
           <Visuel
             src="/products/hero-nature-morte.jpg"
-            alt="Nature morte : plateau à pâtisseries, tajine peint et carafe rayée réunis sur une table de l’atelier"
+            alt="Nature morte d’atelier : qraba calligraphiée, deux tasses peintes et un anthurium sur fond vert"
             legende="Nature morte d’atelier"
-            ratio="4 / 5"
+            ratio="3 / 4"
             ton="lin"
             priorite={true}
           />

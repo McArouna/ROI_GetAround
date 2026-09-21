@@ -10,7 +10,7 @@ structure produit est prête à accueillir Shopify ou Stripe sans refonte (voir
 
 - Astro 7 + Tailwind CSS 4 + TypeScript
 - Sortie 100 % statique (`dist/`), déployable sur Vercel, Netlify ou tout hébergeur de fichiers
-- 27 pièces réparties en 11 familles d’objets
+- 29 pièces réparties en 11 familles d’objets, dont 4 déjà photographiées
 - Aucune image tierce : chaque visuel est un **placeholder au format exact** de la photo à venir
 
 ---
@@ -48,6 +48,8 @@ Toutes les photos vont dans **`public/products/`** (les portraits d’artisans d
 le site affiche un placeholder **au bon ratio et à la bonne place** ; dès que le fichier
 est déposé au bon nom, la photo le remplace au build suivant.
 
+La page d’accueil met **automatiquement en avant les pièces déjà photographiées** (vignettes du hero et grille « Nos plus belles créations »), via `photosDabord()` dans `src/lib/images.ts` : à mesure que les photos arrivent, la vitrine se remplit sans qu’on touche au code.
+
 ```bash
 npm run photos          # ce qui manque encore
 npm run photos -- --all # l’inventaire complet, présent ou non
@@ -67,6 +69,9 @@ npm run photos -- --all # l’inventaire complet, présent ou non
 
 JPEG ou WebP, 1600 px sur le grand côté minimum, ≤ 400 Ko après compression.
 
+> Les cinq photos déjà en place font 744 à 941 px de large : suffisant pour la maquette,
+> un peu juste sur grand écran. Prévoir les fichiers d’origine avant la mise en ligne.
+
 ### Noms de fichiers attendus
 
 Règle : `public/products/<identifiant-du-produit>.jpg` pour le visuel principal,
@@ -74,7 +79,7 @@ puis `-2`, `-3` pour la galerie.
 
 | Pièce | Fichiers |
 | --- | --- |
-| Tasse Tanit | `tasse-tanit.jpg`, `tasse-tanit-2.jpg`, `tasse-tanit-3.jpg` |
+| Tasse Tanit | **`tasse-tanit.jpg`** ✓, **`hero-nature-morte.jpg`** ✓, `tasse-tanit-2.jpg` |
 | Mug Sabah el-Kheir | `mug-sabah-el-kheir.jpg`, `mug-sabah-el-kheir-2.jpg` |
 | Tasse Khamsa | `tasse-khamsa.jpg`, `tasse-khamsa-2.jpg` |
 | Bol Ocre du Hoggar | `bol-ocre-du-hoggar.jpg`, `bol-ocre-du-hoggar-2.jpg`, `bol-ocre-du-hoggar-3.jpg` |
@@ -87,7 +92,9 @@ puis `-2`, `-3` pour la galerie.
 | Plateau Baklawa | `plateau-baklawa.jpg`, `plateau-baklawa-2.jpg`, `plateau-baklawa-3.jpg` |
 | Plateau Makrout & Griwech | `plateau-makrout-griwech.jpg`, `plateau-makrout-griwech-2.jpg` |
 | Plateau Bourek du vendredi | `plateau-bourek-du-vendredi.jpg`, `plateau-bourek-du-vendredi-2.jpg` |
-| Qraba Casbah | `qraba-casbah.jpg`, `qraba-casbah-2.jpg`, `qraba-casbah-3.jpg` |
+| Qraba Casbah | **`qraba-casbah.jpg`** ✓, `qraba-casbah-2.jpg`, `qraba-casbah-3.jpg` |
+| Qraba El Khat | **`qraba-el-khat.jpg`** ✓, **`hero-nature-morte.jpg`** ✓, `qraba-el-khat-2.jpg` |
+| Qraba Zahra | **`qraba-zahra.jpg`** ✓, `qraba-zahra-2.jpg` |
 | Gourde Haïk | `gourde-haik.jpg`, `gourde-haik-2.jpg` |
 | Qraba émaillée Bleu d’Alger | `qraba-emaillee-bleu-alger.jpg`, `qraba-emaillee-bleu-alger-2.jpg` |
 | Pichet Rayures de Ghardaïa | `pichet-rayures-de-ghardaia.jpg`, `pichet-rayures-de-ghardaia-2.jpg` |
@@ -101,7 +108,10 @@ puis `-2`, `-3` pour la galerie.
 | Def peint | `def-peint.jpg`, `def-peint-2.jpg` |
 | Cadre Portes de la Casbah | `cadre-portes-de-la-casbah.jpg`, `cadre-portes-de-la-casbah-2.jpg` |
 | Affiche Alger la Blanche | `affiche-alger-la-blanche.jpg`, `affiche-alger-la-blanche-2.jpg` |
-Visuels éditoriaux : `hero-nature-morte.jpg`, `atelier-mains.jpg`, `atelier-sechage.jpg`,
+
+Les fichiers **en gras suivis de ✓** sont déjà en place.
+
+Visuels éditoriaux : `hero-nature-morte.jpg` ✓ (fournie), `atelier-mains.jpg`, `atelier-sechage.jpg`,
 `sortie-de-four.jpg`.
 Portraits : `artisans/yasmine.jpg`, `artisans/karim.jpg`, `artisans/nawel.jpg`,
 `artisans/sofiane.jpg`, `artisans/lilia.jpg`, `artisans/mehdi.jpg`, `artisans/amina.jpg`.
