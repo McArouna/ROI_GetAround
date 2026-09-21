@@ -1,3 +1,14 @@
+# Dépôt — deux projets
+
+Ce dépôt contient deux projets indépendants :
+
+| Dossier | Projet |
+| --- | --- |
+| [`atelier-alger/`](atelier-alger/README.md) | **Site vitrine & catalogue Atelier Alger** — céramique algérienne peinte à la main (Astro + Tailwind + TypeScript). C'est le projet à déployer : voir son README. |
+| racine (`src/`, `index.html`, `vite.config.js`) | Outil d'analyse ROI GetAround (React + Vite), antérieur et sans rapport. Documenté ci-dessous. |
+
+---
+
 # Analyse ROI — Achat & location GetAround
 
 ## Déploiement gratuit (le plus simple : Netlify Drop)

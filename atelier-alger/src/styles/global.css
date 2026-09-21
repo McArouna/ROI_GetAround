@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------ *
+ * Jetons de design — direction artistique.
+ * Tout changement de palette ou de typo se fait ICI.
+ * ------------------------------------------------------------------ */
+@theme {
+  /* Palette */
+  --color-lin: #f5efe6;
+  --color-lin-profond: #ede4d7;
+  --color-ardoise: #2b2622;
+  --color-argile: #8b4530;
+  --color-argile-clair: #a9583f;
+  --color-teal: #4f7c77; /* contraste 4,69:1 sur blanc — AA texte normal */
+  --color-teal-profond: #3c625e; /* pour le texte fin sur fond clair */
+  --color-filet: #ddd2c1;
+  --color-mastic: #6b5f55; /* légendes — 5,4:1 sur lin, AA */
+  --color-blanc: #ffffff;
+
+  /* Typographie */
+  --font-display: 'DM Serif Display', 'Iowan Old Style', Georgia, serif;
+  --font-sans: 'Jost', 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-arabe: 'Noto Naskh Arabic', serif;
+
+  /* Coins très peu arrondis */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-lin);
+    color: var(--color-ardoise);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    line-height: 1.6;
+    text-rendering: optimizeLegibility;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+  }
+
+  /* Focus visible sur tous les éléments interactifs — accessibilité clavier. */
+  :where(a, button, input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--color-argile);
+    outline-offset: 3px;
+    border-radius: var(--radius-xs);
+  }
+
+  ::selection {
+    background-color: var(--color-argile);
+    color: var(--color-blanc);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Filet horizontal fin, utilisé comme séparateur éditorial. */
+  .filet {
+    border-top: 1px solid var(--color-filet);
+  }
+
+  /* Sur-titre de section : petites capitales espacées. */
+  .surtitre {
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--color-mastic);
+  }
+
+  /* Accent arabe — décoratif (voir README, i18n phase 2). */
+  .arabe {
+    font-family: var(--font-arabe);
+    direction: rtl;
+    unicode-bidi: isolate;
+    line-height: 1.9;
+  }
+
+  /* Boutons — cibles tactiles ≥ 44 px garanties par min-height. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    min-height: 44px;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    transition:
+      background-color 0.25s ease,
+      color 0.25s ease,
+      border-color 0.25s ease;
+  }
+
+  .btn-primaire {
+    background-color: var(--color-argile);
+    color: var(--color-blanc);
+  }
+  .btn-primaire:hover {
+    background-color: #73391f;
+  }
+
+  .btn-ligne {
+    border: 1px solid var(--color-ardoise);
+    color: var(--color-ardoise);
+  }
+  .btn-ligne:hover {
+    background-color: var(--color-ardoise);
+    color: var(--color-lin);
+  }
+
+  .btn-clair {
+    border: 1px solid rgb(255 255 255 / 0.65);
+    color: var(--color-blanc);
+  }
+  .btn-clair:hover {
+    background-color: var(--color-blanc);
+    color: var(--color-ardoise);
+  }
+}

@@ -1,0 +1,136 @@
+---
+import Logo from './Logo.astro';
+import { brand, liensFooter, langues } from '../data/brand';
+import { categories } from '../data/categories';
+
+const annee = new Date().getFullYear();
+const categoriesFooter = categories.slice(0, 6);
+---
+
+<footer id="contact" class="border-t border-filet bg-blanc">
+  <div class="mx-auto max-w-[1240px] px-5 py-14 sm:px-8 sm:py-20">
+    <div class="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr] md:gap-10">
+      <div>
+        <p class="flex items-center gap-2 font-display text-xl text-ardoise">
+          <Logo class="text-argile" />
+          {brand.nom}
+        </p>
+        <p class="mt-4 max-w-xs text-sm leading-relaxed text-mastic">
+          {brand.accroche}
+        </p>
+        <p class="arabe mt-4 text-lg text-teal-profond">{brand.baselineArabe}</p>
+      </div>
+
+      <nav aria-label="Pages">
+        <h2 class="surtitre">La maison</h2>
+        <ul class="mt-4 space-y-1">
+          {
+            liensFooter.map((lien) => (
+              <li>
+                <a
+                  href={lien.href}
+                  class="flex min-h-11 items-center text-sm text-ardoise hover:text-argile"
+                >
+                  {lien.libelle}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <a
+              href="/collection"
+              class="flex min-h-11 items-center text-sm text-ardoise hover:text-argile"
+            >
+              Toute la collection
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <nav aria-label="Catégories">
+        <h2 class="surtitre">Le catalogue</h2>
+        <ul class="mt-4 space-y-1">
+          {
+            categoriesFooter.map((categorie) => (
+              <li>
+                <a
+                  href={`/collection#${categorie.id}`}
+                  class="flex min-h-11 items-center text-sm text-ardoise hover:text-argile"
+                >
+                  {categorie.nom}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+
+    <div class="filet mt-12 grid gap-8 pt-8 md:grid-cols-[1.4fr_1fr_1fr]">
+      <div>
+        <h2 class="surtitre">Nous écrire</h2>
+        <ul class="mt-3 space-y-1 text-sm text-mastic">
+          <li>
+            <a
+              href={`mailto:${brand.contact.email}`}
+              class="inline-flex min-h-11 items-center text-ardoise hover:text-argile"
+            >
+              {brand.contact.email}
+            </a>
+          </li>
+          <li>
+            <a
+              href={`tel:${brand.contact.telephone.replace(/[^+0-9]/g, '')}`}
+              class="inline-flex min-h-11 items-center text-ardoise hover:text-argile"
+            >
+              {brand.contact.telephone}
+            </a>
+          </li>
+          <li>{brand.contact.delai}</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2 class="surtitre">Nous trouver</h2>
+        <p class="mt-3 text-sm text-mastic">{brand.contact.adresse}</p>
+        <ul class="mt-3 flex flex-wrap gap-4">
+          {
+            brand.reseaux.map((reseau) => (
+              <li>
+                <a
+                  href={reseau.url}
+                  class="inline-flex min-h-11 items-center text-sm text-ardoise underline decoration-filet underline-offset-4 hover:text-argile"
+                >
+                  {reseau.nom}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div>
+        <label for="langue" class="surtitre block">Langue</label>
+        <select
+          id="langue"
+          name="langue"
+          class="mt-3 min-h-11 w-full max-w-[12rem] rounded-xs border border-filet bg-blanc px-3 text-sm text-ardoise"
+        >
+          {
+            langues.map((langue) => (
+              <option value={langue.code} selected={langue.actif} disabled={!langue.actif}>
+                {langue.libelle}
+                {!langue.actif && ' — bientôt'}
+              </option>
+            ))
+          }
+        </select>
+        <p class="mt-2 text-xs text-mastic">Version arabe en préparation.</p>
+      </div>
+    </div>
+
+    <p class="filet mt-10 pt-6 text-xs text-mastic">
+      © {annee} {brand.nom} — {brand.promesse}. Chaque pièce est signée par la main qui l’a peinte.
+    </p>
+  </div>
+</footer>

@@ -1,0 +1,51 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { brand } from '../data/brand';
+
+interface Props {
+  titre: string;
+  description: string;
+  /** Header transparent posé sur le visuel du hero (page d’accueil). */
+  headerSurVisuel?: boolean;
+}
+
+const { titre, description, headerSurVisuel = false } = Astro.props;
+const titreComplet = `${titre} — ${brand.nom}`;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titreComplet}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={titreComplet} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Jost:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;600&display=swap"
+    />
+  </head>
+  <body class="bg-lin text-ardoise antialiased">
+    <a
+      href="#contenu"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-ardoise focus:px-4 focus:py-3 focus:text-lin"
+    >
+      Aller au contenu
+    </a>
+    <Header surVisuel={headerSurVisuel} />
+    <main id="contenu">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

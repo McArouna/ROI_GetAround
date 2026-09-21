@@ -1,0 +1,113 @@
+---
+import Logo from './Logo.astro';
+import { brand, navigation } from '../data/brand';
+
+interface Props {
+  /** Posé en surimpression sur le visuel du hero. */
+  surVisuel?: boolean;
+}
+const { surVisuel = false } = Astro.props;
+
+const teinte = surVisuel ? 'text-blanc' : 'text-ardoise';
+const fond = surVisuel ? 'absolute inset-x-0 top-0 z-30' : 'relative border-b border-filet bg-lin';
+---
+
+<header class={`${fond} ${teinte}`}>
+  <div class="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-5 py-4 sm:px-8">
+    <button
+      type="button"
+      id="menu-ouvrir"
+      aria-expanded="false"
+      aria-controls="menu-panneau"
+      class="-ml-2 inline-flex min-h-11 items-center gap-2.5 px-2 text-sm tracking-[0.12em] uppercase"
+    >
+      <span class="flex flex-col gap-[3px]" aria-hidden="true">
+        <span class="block h-px w-4 bg-current"></span>
+        <span class="block h-px w-4 bg-current"></span>
+      </span>
+      Menu
+    </button>
+
+    <a
+      href="/"
+      class="inline-flex min-h-11 items-center gap-2 font-display text-lg tracking-tight sm:text-xl"
+    >
+      <Logo />
+      <span>{brand.nom}</span>
+    </a>
+
+    <a
+      href="/#contact"
+      class="-mr-2 inline-flex min-h-11 items-center px-2 text-sm tracking-[0.12em] uppercase"
+    >
+      Contact
+    </a>
+  </div>
+
+  <!-- Panneau de navigation -->
+  <div
+    id="menu-panneau"
+    hidden
+    class="absolute inset-x-0 top-0 z-40 border-b border-filet bg-lin text-ardoise shadow-[0_18px_40px_-28px_rgba(43,38,34,0.5)]"
+  >
+    <div class="mx-auto max-w-[1240px] px-5 py-4 sm:px-8">
+      <div class="flex items-center justify-between">
+        <span class="surtitre">Navigation</span>
+        <button
+          type="button"
+          id="menu-fermer"
+          class="-mr-2 inline-flex min-h-11 items-center px-2 text-sm tracking-[0.12em] uppercase"
+        >
+          Fermer
+        </button>
+      </div>
+      <nav aria-label="Navigation principale" class="filet mt-3 pt-4">
+        <ul class="flex flex-col gap-1 pb-4">
+          {
+            navigation.map((lien) => (
+              <li>
+                <a
+                  href={lien.href}
+                  class="flex min-h-11 items-center font-display text-2xl leading-tight hover:text-argile sm:text-3xl"
+                >
+                  {lien.libelle}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="arabe pb-4 text-lg text-mastic">{brand.baselineArabe}</p>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<script>
+  const ouvrir = document.getElementById('menu-ouvrir');
+  const fermer = document.getElementById('menu-fermer');
+  const panneau = document.getElementById('menu-panneau');
+
+  if (ouvrir && fermer && panneau) {
+    const basculer = (ouvert: boolean) => {
+      panneau.hidden = !ouvert;
+      ouvrir.setAttribute('aria-expanded', String(ouvert));
+      if (ouvert) {
+        fermer.focus();
+      } else {
+        ouvrir.focus();
+      }
+    };
+
+    ouvrir.addEventListener('click', () => basculer(true));
+    fermer.addEventListener('click', () => basculer(false));
+    panneau.querySelectorAll('a').forEach((lien) => {
+      lien.addEventListener('click', () => {
+        panneau.hidden = true;
+        ouvrir.setAttribute('aria-expanded', 'false');
+      });
+    });
+    document.addEventListener('keydown', (evenement) => {
+      if (evenement.key === 'Escape' && !panneau.hidden) basculer(false);
+    });
+  }
+</script>
