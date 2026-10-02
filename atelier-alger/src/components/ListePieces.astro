@@ -1,0 +1,85 @@
+---
+/**
+ * Page de liste du catalogue : toutes les pièces, un type ou une collection.
+ * Navigation croisée en tête (collections par région, types de pièces),
+ * puis grille 4:5 identique à celle de l'accueil.
+ */
+import Base from '../layouts/Base.astro';
+import ProductCard from './ProductCard.astro';
+import { collectionsAffichables, typesAffichables } from '../lib/catalogue';
+import type { Product } from '../data/products';
+
+interface Props {
+  titre: string;
+  intro: string;
+  pieces: Product[];
+  /** Lien actif dans les filtres. */
+  actif: string;
+}
+
+const { titre, intro, pieces, actif } = Astro.props;
+
+const groupes = [
+  {
+    libelle: 'Collections',
+    liens: [
+      { id: 'tout', libelle: 'Toutes les pièces', href: '/collection' },
+      ...collectionsAffichables.map((c) => ({ id: c.id, libelle: c.nom, href: `/collection/${c.id}` })),
+    ],
+  },
+  {
+    libelle: 'Pièces',
+    liens: typesAffichables.map((t) => ({ id: t.id, libelle: t.nom, href: `/collection/${t.id}` })),
+  },
+];
+---
+
+<Base titre={titre} description={intro}>
+  <section class="section">
+    <div class="conteneur">
+      <p class="surtitre">{pieces.length} pièce{pieces.length > 1 ? 's' : ''}</p>
+      <h1 class="mt-4 text-5xl sm:text-6xl">{titre}</h1>
+      <p class="mt-4 max-w-xl leading-relaxed text-mastic">{intro}</p>
+
+      <div class="filet mt-10 grid gap-6 pt-6 md:grid-cols-[auto_1fr] md:gap-x-10">
+        {
+          groupes.map((groupe) => (
+            <>
+              <p class="surtitre md:pt-3">{groupe.libelle}</p>
+              <nav aria-label={groupe.libelle}>
+                <ul class="flex flex-wrap gap-x-6 gap-y-1">
+                  {groupe.liens.map((lien) => (
+                    <li>
+                      <a
+                        href={lien.href}
+                        aria-current={lien.id === actif ? 'page' : undefined}
+                        class:list={[
+                          'inline-flex min-h-11 items-center text-sm underline-offset-[6px]',
+                          lien.id === actif
+                            ? 'text-ardoise underline decoration-argile'
+                            : 'text-mastic hover:text-ardoise',
+                        ]}
+                      >
+                        {lien.libelle}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </>
+          ))
+        }
+      </div>
+
+      <ul class="mt-14 grid grid-cols-2 gap-x-4 gap-y-12 sm:gap-x-6 lg:grid-cols-4">
+        {
+          pieces.map((produit) => (
+            <li>
+              <ProductCard produit={produit} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>

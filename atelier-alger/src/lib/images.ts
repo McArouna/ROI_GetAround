@@ -28,11 +28,11 @@ export interface JeuImage {
 }
 
 /**
- * Jeu d'images pour un chemin de base.
- * `repli` vaut 'png' pour les packshots détourés (transparence) et 'jpg' pour
- * les photos d'ambiance.
+ * Jeu d'images pour un chemin de base. Le format de repli est détecté :
+ * PNG pour les packshots détourés (transparence), JPEG pour les photos.
  */
-export function jeuImage(base: string, repli: 'png' | 'jpg' = 'png'): JeuImage {
+export function jeuImage(base: string): JeuImage {
+  const repli = fichierExiste(`${base}.png`) ? 'png' : 'jpg';
   const webp1x = `${base}.webp`;
   const webp2x = `${base}@2x.webp`;
   const repli1x = `${base}.${repli}`;
@@ -53,18 +53,6 @@ export function jeuImage(base: string, repli: 'png' | 'jpg' = 'png'): JeuImage {
 }
 
 /** Vrai si le visuel a déjà été livré et traité. */
-export function visuelDisponible(base: string, repli: 'png' | 'jpg' = 'png'): boolean {
-  return jeuImage(base, repli).existe;
-}
-
-/**
- * Remonte les pièces déjà photographiées en tête de liste (tri stable :
- * l'ordre du catalogue est conservé à l'intérieur de chaque groupe).
- * La page d'accueil met ainsi en avant ce qui a une vraie photo, sans qu'on
- * ait à réordonner products.ts à chaque livraison de visuels.
- */
-export function photosDabord<T extends { image: string }>(produits: T[]): T[] {
-  return [...produits].sort(
-    (a, b) => Number(visuelDisponible(b.image)) - Number(visuelDisponible(a.image)),
-  );
+export function visuelDisponible(base: string): boolean {
+  return jeuImage(base).existe;
 }

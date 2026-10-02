@@ -1,36 +1,35 @@
 @import 'tailwindcss';
 
 /* ------------------------------------------------------------------ *
- * Jetons de design — direction artistique.
- * Tout changement de palette, de typo ou d'ombre se fait ICI.
+ * Jetons de design. Palette inchangée : seules ces variables existent,
+ * le reste en dérive. Deux polices, pas une de plus.
  * ------------------------------------------------------------------ */
 @theme {
   /* Palette */
-  --color-lin: #f5f0e8; /* le crème des sections produit */
-  --color-ardoise: #2b2622; /* texte, et fond charbon des bandes sombres */
-  --color-argile: #8b4530;
+  --color-lin: #f5f0e8; /* crème : fond du site */
+  --color-ardoise: #2b2622; /* texte, barre d'annonce */
+  --color-argile: #8b4530; /* terracotta : action principale */
   --color-argile-clair: #a9583f;
-  --color-teal: #4f7c77; /* contraste 4,69:1 sur blanc — AA texte normal */
-  --color-teal-profond: #3c625e; /* texte fin sur fond clair */
-  --color-vert-atelier: #023833; /* vert de la nature morte : bandes sombres */
+  --color-teal: #4f7c77;
+  --color-teal-profond: #3c625e;
+  --color-vert-atelier: #023833; /* vert de la nature morte */
   --color-filet: #ddd2c1;
-  --color-mastic: #6b5f55; /* légendes — 5,4:1 sur crème, AA */
+  --color-mastic: #6b5f55; /* textes secondaires — 5,5:1 sur crème */
   --color-blanc: #ffffff;
 
-  /* Typographie */
+  /* Fond uni des photos produit : dérivé de la palette (crème + filet). */
+  --color-fond-produit: color-mix(in srgb, var(--color-lin) 58%, var(--color-filet));
+
+  /* Typographie : un serif pour les titres, un sans-serif pour le reste. */
   --font-display: 'DM Serif Display', 'Iowan Old Style', Georgia, serif;
   --font-sans: 'Jost', 'Avenir Next', 'Segoe UI', sans-serif;
-  --font-arabe: 'Noto Naskh Arabic', serif;
 
-  /* Coins très peu arrondis */
   --radius-xs: 2px;
   --radius-sm: 3px;
   --radius-md: 4px;
 
-  /* Ombres produit : UNE seule direction de lumière (verticale, du haut),
-     donc une seule géométrie d'ombre. Seule l'opacité s'adapte au fond. */
-  --ombre-sombre: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45));
-  --ombre-claire: drop-shadow(0 12px 24px rgba(43, 38, 34, 0.2));
+  /* Une seule ombre produit, une seule direction de lumière. */
+  --ombre-produit: drop-shadow(0 14px 22px rgba(43, 38, 34, 0.18));
 }
 
 @layer base {
@@ -44,7 +43,7 @@
     color: var(--color-ardoise);
     font-family: var(--font-sans);
     font-weight: 300;
-    line-height: 1.6;
+    line-height: 1.65;
     text-rendering: optimizeLegibility;
   }
 
@@ -53,11 +52,10 @@
   h3 {
     font-family: var(--font-display);
     font-weight: 400;
-    line-height: 1.08;
-    letter-spacing: -0.01em;
+    line-height: 1.1;
+    letter-spacing: -0.005em;
   }
 
-  /* Focus visible sur tous les éléments interactifs — accessibilité clavier. */
   :where(a, button, input, select, textarea, summary):focus-visible {
     outline: 2px solid var(--color-argile);
     outline-offset: 3px;
@@ -77,110 +75,147 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
   }
 }
 
 @layer components {
-  /* Filet horizontal fin, séparateur éditorial. */
+  /* ---------------------------------------------------------------- *
+   * Mise en page : conteneur 1280 px, 96 px minimum entre sections
+   * (48 px de part et d'autre sur mobile, davantage ensuite).
+   * ---------------------------------------------------------------- */
+  .conteneur {
+    width: 100%;
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .conteneur {
+      padding-inline: 2rem;
+    }
+  }
+  @media (min-width: 1280px) {
+    .conteneur {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  .section {
+    padding-block: 3rem;
+  }
+  @media (min-width: 768px) {
+    .section {
+      padding-block: 4rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .section {
+      padding-block: 5rem;
+    }
+  }
+
   .filet {
     border-top: 1px solid var(--color-filet);
   }
 
-  /* Sur-titre de section : petites capitales espacées. */
   .surtitre {
     font-size: 0.6875rem;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     font-weight: 400;
     color: var(--color-mastic);
   }
 
-  /* Accent arabe — décoratif (voir README, i18n phase 2). */
-  .arabe {
-    font-family: var(--font-arabe);
-    direction: rtl;
-    unicode-bidi: isolate;
-    /* Le mot reste écrit de droite à gauche, mais il s'aligne sur le bord du
-       bloc de texte qui l'accueille : la mise en page du MVP est LTR. */
-    text-align: left;
-    line-height: 1.9;
-  }
-
-  /* Boutons — cibles tactiles ≥ 44 px garanties par min-height. */
+  /* ---------------------------------------------------------------- *
+   * Boutons : petits et sobres. Plein terracotta pour l'action
+   * principale, contour fin pour le reste. 44 px de cible tactile.
+   * ---------------------------------------------------------------- */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.625rem;
     min-height: 44px;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.875rem;
-    letter-spacing: 0.06em;
+    padding: 0.625rem 1.375rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-xs);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
+    white-space: nowrap;
     transition:
-      background-color 0.25s ease,
-      color 0.25s ease,
-      border-color 0.25s ease;
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
   }
 
   .btn-primaire {
     background-color: var(--color-argile);
+    border-color: var(--color-argile);
     color: var(--color-blanc);
   }
   .btn-primaire:hover {
-    background-color: #73391f;
+    background-color: var(--color-ardoise);
+    border-color: var(--color-ardoise);
+  }
+  .btn-primaire[aria-disabled='true'] {
+    background-color: transparent;
+    border-color: var(--color-filet);
+    color: var(--color-mastic);
+    pointer-events: none;
   }
 
-  /* Variante du bouton primaire sur fond sombre : l'argile de la charte ne
-     détache pas assez du charbon (2,1:1 pour la bordure du composant, sous le
-     seuil 3:1 de la règle 1.4.11), l'argile clair oui (3,1:1), avec un texte
-     blanc à 4,8:1. */
-  .btn-primaire-sombre {
-    background-color: var(--color-argile-clair);
-    color: var(--color-blanc);
-  }
-  .btn-primaire-sombre:hover {
-    background-color: var(--color-lin);
+  .btn-contour {
+    border-color: var(--color-ardoise);
     color: var(--color-ardoise);
   }
-
-  .btn-ligne {
-    border: 1px solid var(--color-ardoise);
-    color: var(--color-ardoise);
-  }
-  .btn-ligne:hover {
+  .btn-contour:hover {
     background-color: var(--color-ardoise);
     color: var(--color-lin);
   }
 
-  .btn-clair {
-    border: 1px solid rgb(255 255 255 / 0.65);
-    color: var(--color-blanc);
+  .btn-contour-clair {
+    border-color: rgb(245 240 232 / 0.7);
+    color: var(--color-lin);
   }
-  .btn-clair:hover {
-    background-color: var(--color-blanc);
+  .btn-contour-clair:hover {
+    background-color: var(--color-lin);
     color: var(--color-ardoise);
   }
 
+  /* Lien texte souligné finement (« Tout afficher »). */
+  .lien-fleche {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-ardoise);
+    text-decoration: underline;
+    text-decoration-color: var(--color-filet);
+    text-underline-offset: 6px;
+    transition: text-decoration-color 0.2s ease;
+  }
+  .lien-fleche:hover {
+    text-decoration-color: var(--color-ardoise);
+  }
+
   /* ---------------------------------------------------------------- *
-   * Packshot — le cadre produit, strictement identique partout.
-   *
-   * Pas de carte, pas de fond propre, pas de bord : le produit détouré est
-   * posé sur le fond de la section. La marge interne (15 % de part et
-   * d'autre) est cuite dans le fichier par le pipeline d'images, donc
-   * rigoureusement la même d'une pièce à l'autre.
+   * Photo produit — identique partout : 4:5, fond uni, produit détouré
+   * occupant ~70 % du cadre (marge cuite par le pipeline), une ombre.
+   * Jamais d'arche sur un produit.
    * ---------------------------------------------------------------- */
   .packshot {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 1 / 1;
-    border-radius: var(--radius-md);
-    /* Pas d'overflow caché : l'ombre portée doit pouvoir dépasser. */
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: var(--radius-xs);
+    background-color: var(--color-fond-produit);
   }
 
   .packshot picture {
@@ -193,85 +228,43 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
+    filter: var(--ombre-produit);
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  /* Une seule ombre, suivant le détourage (drop-shadow, pas box-shadow). */
-  .packshot--sombre .packshot__image {
-    filter: var(--ombre-sombre);
-  }
-  .packshot--creme .packshot__image {
-    filter: var(--ombre-claire);
+  a:hover .packshot__image,
+  a:focus-visible .packshot__image {
+    transform: scale(1.025);
   }
 
-  .packshot--survol {
-    transition: transform 200ms ease;
-    will-change: transform;
-  }
-  a:hover .packshot--survol,
-  a:focus-visible .packshot--survol {
-    transform: translateY(-4px);
+  /* Gros plan de détail : même cadre 4:5, image pleine. */
+  .packshot--detail .packshot__image {
+    object-fit: cover;
+    filter: none;
   }
 
-  /* Repère d'attente : mêmes dimensions que le produit à venir. */
-  .packshot__attente,
-  .photo__attente {
+  .badge {
     position: absolute;
-    inset: 13%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    padding: 0.75rem;
-    text-align: center;
-    border: 1px solid var(--color-filet);
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 1;
+    padding: 0.3rem 0.6rem;
     border-radius: var(--radius-xs);
-    color: var(--color-mastic);
-  }
-
-  .photo__attente {
-    inset: 0;
-  }
-
-  .packshot--sombre .packshot__attente,
-  .photo--sombre .photo__attente {
-    border-color: rgb(245 240 232 / 0.28);
-    color: rgb(245 240 232 / 0.72);
-  }
-
-  .packshot__nom {
-    font-family: var(--font-display);
-    font-size: 0.9375rem;
-    line-height: 1.2;
-    color: inherit;
-  }
-
-  .packshot__mention {
+    background-color: var(--color-ardoise);
+    color: var(--color-lin);
     font-size: 0.625rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
 
   /* ---------------------------------------------------------------- *
-   * Photo d'ambiance — cadrage photographique, sans ombre ajoutée.
+   * Photo d'ambiance — cadrage photographique ; en arche pour l'atelier,
+   * l'artisan et le hero secondaire.
    * ---------------------------------------------------------------- */
   .photo {
     position: relative;
     overflow: hidden;
-    border-radius: var(--radius-md);
-    background-color: color-mix(in srgb, var(--color-lin) 70%, var(--color-filet));
-  }
-
-  .photo--sombre {
-    background-color: rgb(2 56 51 / 0.5);
-  }
-
-  /* Remplit son conteneur, sans arrondi : utilisé par le hero. */
-  .photo--plein {
-    position: absolute;
-    inset: 0;
-    border-radius: 0;
-    background-color: var(--color-vert-atelier);
+    background-color: var(--color-fond-produit);
   }
 
   .photo picture,
@@ -282,44 +275,182 @@
     object-fit: cover;
   }
 
+  /* Arche : demi-cercle parfait en tête, quel que soit le ratio. */
+  .photo--arche {
+    border-radius: 9999px 9999px 0 0;
+  }
+
   /* ---------------------------------------------------------------- *
-   * Hero — la nature morte est fondue dans le fond de la section : elle est
-   * posée en pleine hauteur et son voile de dégradé la raccorde au charbon,
-   * pour qu'aucune arête de photo ne soit visible.
+   * Barre d'annonce défilante. Le contenu est dupliqué pour une boucle
+   * sans couture ; immobile si l'utilisateur limite les animations.
    * ---------------------------------------------------------------- */
-  /* Cadrage de la nature morte : on privilégie le haut de la scène
-     (feuille + col de la qraba) quand le cadre s'élargit. */
-  .hero-photo .photo__image {
-    object-position: center 38%;
+  .annonce {
+    overflow: hidden;
+    background-color: var(--color-ardoise);
+    color: var(--color-lin);
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
   }
 
-  /* Mobile : la photo est en bas du hero ; le voile la raccorde au charbon
-     en haut comme en bas, pour qu'aucune arête de photo n'apparaisse. */
-  .hero-voile {
-    position: absolute;
-    inset: 0;
-    background:
-      linear-gradient(
-        to bottom,
-        var(--color-ardoise) 0%,
-        rgb(43 38 34 / 0.55) 16%,
-        rgb(43 38 34 / 0) 46%
-      ),
-      linear-gradient(to top, var(--color-ardoise) 0%, rgb(43 38 34 / 0) 20%);
+  .annonce__piste {
+    display: flex;
+    width: max-content;
+    animation: annonce-defile 38s linear infinite;
   }
 
-  @media (min-width: 1024px) {
-    /* Bureau : la photo tient la moitié droite, le voile la raccorde à gauche
-       et en bas, sans arête visible. */
-    .hero-voile {
-      background:
-        linear-gradient(
-          to right,
-          var(--color-ardoise) 0%,
-          rgb(43 38 34 / 0.7) 14%,
-          rgb(43 38 34 / 0) 46%
-        ),
-        linear-gradient(to top, var(--color-ardoise) 0%, rgb(43 38 34 / 0) 26%);
+  .annonce:hover .annonce__piste {
+    animation-play-state: paused;
+  }
+
+  .annonce__groupe {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .annonce__message {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 0.6rem;
+    padding-inline: 2.5rem;
+    white-space: nowrap;
+  }
+
+  .annonce__message::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    margin-left: 5rem;
+    border-radius: 50%;
+    background-color: var(--color-argile-clair);
+  }
+
+  @keyframes annonce-defile {
+    from {
+      transform: translateX(0);
     }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .annonce__piste {
+      animation: none;
+      width: 100%;
+      justify-content: center;
+    }
+    .annonce__groupe[aria-hidden='true'] {
+      display: none;
+    }
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Navigation : sous-menus au survol ET au focus clavier.
+   * ---------------------------------------------------------------- */
+  .nav-lien {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-ardoise);
+  }
+
+  .nav-lien:hover {
+    color: var(--color-argile);
+  }
+
+  .nav-item {
+    position: relative;
+  }
+
+  .sous-menu {
+    position: absolute;
+    top: 100%;
+    left: -1.25rem;
+    z-index: 40;
+    min-width: 15rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--color-filet);
+    border-radius: var(--radius-xs);
+    background-color: var(--color-lin);
+    box-shadow: 0 18px 40px -24px rgb(43 38 34 / 0.35);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition:
+      opacity 0.18s ease,
+      transform 0.18s ease,
+      visibility 0.18s;
+  }
+
+  .nav-item:hover .sous-menu,
+  .nav-item:focus-within .sous-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .sous-menu a {
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    font-size: 0.9375rem;
+    color: var(--color-ardoise);
+  }
+
+  .sous-menu a:hover {
+    color: var(--color-argile);
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Phrase de réassurance entre deux rangées.
+   * ---------------------------------------------------------------- */
+  .reassurance {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    color: var(--color-mastic);
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.125rem;
+    text-align: center;
+  }
+
+  .reassurance::before,
+  .reassurance::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--color-filet);
+  }
+
+  /* Sur mobile, la phrase prend toute la largeur : pas de filets latéraux. */
+  @media (max-width: 639px) {
+    .reassurance {
+      display: block;
+      font-size: 1.0625rem;
+    }
+    .reassurance::before,
+    .reassurance::after {
+      display: none;
+    }
+  }
+
+  /* Champ de formulaire. */
+  .champ {
+    min-height: 44px;
+    width: 100%;
+    padding-inline: 0.875rem;
+    border: 1px solid var(--color-filet);
+    border-radius: var(--radius-xs);
+    background-color: var(--color-blanc);
+    color: var(--color-ardoise);
+    font-size: 0.9375rem;
+  }
+
+  .champ::placeholder {
+    color: var(--color-mastic);
   }
 }

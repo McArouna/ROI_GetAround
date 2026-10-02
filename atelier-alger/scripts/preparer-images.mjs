@@ -33,8 +33,9 @@ const DOSSIER_SOURCES = 'sources';
 const DOSSIER_DETOURES = 'sources/detoures';
 const DOSSIER_SORTIE = 'public/products';
 
-/** Côté du cadre carré exporté en 2× (1× = la moitié). */
-const CADRE_2X = 800;
+/** Cadre packshot au ratio 4:5, exporté en 2× (1× = la moitié). */
+const CADRE_LARGEUR = 800;
+const CADRE_HAUTEUR = 1000;
 /**
  * Échelle apparente : part de la hauteur du cadre occupée par une pièce
  * verticale type (une qraba, une carafe, un mug haut).
@@ -55,7 +56,24 @@ const PART_HAUTEUR_MAX = 0.74;
 const SEUIL_ALPHA = 12;
 
 /** Photos d'ambiance : conservées telles quelles, sans détourage. */
-const SCENES = new Set(['hero-nature-morte', 'atelier-mains', 'atelier-sechage', 'sortie-de-four']);
+const SCENES = new Set([
+  'hero-nature-morte',
+  'atelier-ambiance',
+  'atelier-mains',
+  'atelier-sechage',
+  'sortie-de-four',
+]);
+/** Les gros plans « <id>-detail-N » sont aussi des photos, pas des packshots. */
+const estScene = (identifiant) => SCENES.has(identifiant) || identifiant.includes('-detail-');
+
+/**
+ * Recadrages d'un plan de groupe : le détourage peut ramener un morceau de
+ * la pièce voisine. On ne garde alors que la plus grande forme.
+ */
+const FORME_UNIQUE = new Set(['assiette-rayee-ghardaia', 'gobelets-rayes']);
+
+/** En dessous de cette largeur, une scène n'est servie qu'en une densité. */
+const LARGEUR_MIN_2X = 1200;
 
 /* ------------------------------------------------------------------ *
  * Détourage de secours (sans Python).
@@ -201,6 +219,16 @@ function plusGrandeForme(estFond, w, h) {
   return { garde, taille: meilleure.length };
 }
 
+/** Efface tout ce qui n'appartient pas à la plus grande forme opaque. */
+function garderPlusGrandeForme(rgba, w, h) {
+  const transparent = new Uint8Array(w * h);
+  for (let p = 0; p < w * h; p++) transparent[p] = rgba[p * 4 + 3] <= SEUIL_ALPHA ? 1 : 0;
+  const { garde } = plusGrandeForme(transparent, w, h);
+  const net = Buffer.from(rgba);
+  for (let p = 0; p < w * h; p++) if (!garde[p]) net[p * 4 + 3] = 0;
+  return net;
+}
+
 /** Packshot RVBA obtenu par détourage de secours. */
 async function detourageDeSecours(chemin) {
   const { data, info } = await sharp(chemin)
@@ -259,11 +287,11 @@ function boiteDuContenu(rgba, w, h) {
   return { left: x0, top: y0, width: x1 - x0 + 1, height: y1 - y0 + 1 };
 }
 
-/** Écrit un couple WebP + PNG de repli, au côté demandé. */
-async function exporterPackshot(buffer, nom, cote) {
+/** Écrit un couple WebP + PNG de repli, aux dimensions demandées. */
+async function exporterPackshot(buffer, nom, largeur, hauteur) {
   const base = join(DOSSIER_SORTIE, nom);
   const cadrer = () =>
-    sharp(buffer).resize(cote, cote, {
+    sharp(buffer).resize(largeur, hauteur, {
       fit: 'contain',
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     });
@@ -298,18 +326,19 @@ async function traiterPackshot(identifiant, options) {
     return false;
   }
 
+  if (FORME_UNIQUE.has(identifiant)) rgba = garderPlusGrandeForme(rgba, w, h);
   const boite = boiteDuContenu(rgba, w, h);
 
   // Échelle normalisée : toutes les pièces occupent la même AIRE, celle d'une
   // pièce verticale type haute de 70 % du cadre. La marge interne est donc
   // constante d'une vignette à l'autre, et aucune forme ne domine la grille.
-  const aireVisee = (CADRE_2X * PART_PRODUIT) ** 2 * RATIO_REFERENCE;
+  const aireVisee = (CADRE_HAUTEUR * PART_PRODUIT) ** 2 * RATIO_REFERENCE;
   let echelle = Math.sqrt(aireVisee / (boite.width * boite.height));
-  if (boite.height * echelle > CADRE_2X * PART_HAUTEUR_MAX) {
-    echelle = (CADRE_2X * PART_HAUTEUR_MAX) / boite.height;
+  if (boite.height * echelle > CADRE_HAUTEUR * PART_HAUTEUR_MAX) {
+    echelle = (CADRE_HAUTEUR * PART_HAUTEUR_MAX) / boite.height;
   }
-  if (boite.width * echelle > CADRE_2X * PART_LARGEUR_MAX) {
-    echelle = (CADRE_2X * PART_LARGEUR_MAX) / boite.width;
+  if (boite.width * echelle > CADRE_LARGEUR * PART_LARGEUR_MAX) {
+    echelle = (CADRE_LARGEUR * PART_LARGEUR_MAX) / boite.width;
   }
   const largeur = Math.max(1, Math.round(boite.width * echelle));
   const hauteur = Math.max(1, Math.round(boite.height * echelle));
@@ -322,8 +351,8 @@ async function traiterPackshot(identifiant, options) {
 
   const cadre = await sharp({
     create: {
-      width: CADRE_2X,
-      height: CADRE_2X,
+      width: CADRE_LARGEUR,
+      height: CADRE_HAUTEUR,
       channels: 4,
       background: { r: 0, g: 0, b: 0, alpha: 0 },
     },
@@ -331,21 +360,21 @@ async function traiterPackshot(identifiant, options) {
     .composite([
       {
         input: decoupe,
-        left: Math.round((CADRE_2X - largeur) / 2),
-        top: Math.round((CADRE_2X - hauteur) / 2),
+        left: Math.round((CADRE_LARGEUR - largeur) / 2),
+        top: Math.round((CADRE_HAUTEUR - hauteur) / 2),
       },
     ])
     .png()
     .toBuffer();
 
-  await exporterPackshot(cadre, `${identifiant}@2x`, CADRE_2X);
-  await exporterPackshot(cadre, identifiant, CADRE_2X / 2);
+  await exporterPackshot(cadre, `${identifiant}@2x`, CADRE_LARGEUR, CADRE_HAUTEUR);
+  await exporterPackshot(cadre, identifiant, CADRE_LARGEUR / 2, CADRE_HAUTEUR / 2);
 
-  const partHauteur = ((hauteur / CADRE_2X) * 100).toFixed(0);
-  const partAire = ((largeur * hauteur) / (CADRE_2X * CADRE_2X) * 100).toFixed(0);
+  const partHauteur = ((hauteur / CADRE_HAUTEUR) * 100).toFixed(0);
+  const partAire = (((largeur * hauteur) / (CADRE_LARGEUR * CADRE_HAUTEUR)) * 100).toFixed(0);
   console.log(
     `✓ ${identifiant} — ${origine}, objet ${largeur}×${hauteur} px dans un cadre ` +
-      `${CADRE_2X}² (${partHauteur} % de la hauteur, ${partAire} % de l’aire)`,
+      `${CADRE_LARGEUR}×${CADRE_HAUTEUR} (${partHauteur} % de la hauteur, ${partAire} % de l’aire)`,
   );
   return true;
 }
@@ -355,12 +384,17 @@ async function traiterScene(chemin, identifiant) {
   const { width, height } = await source.metadata();
   const base = join(DOSSIER_SORTIE, identifiant);
 
-  // 1× = demi-largeur, 2× = largeur native : aucune image n'est agrandie.
-  // Fournir un original plus grand suffit à obtenir un vrai 2×.
-  for (const { suffixe, largeur } of [
-    { suffixe: '', largeur: Math.round(width / 2) },
-    { suffixe: '@2x', largeur: width },
-  ]) {
+  // Aucune image n'est agrandie. Une scène assez grande est servie en 1×
+  // (demi-largeur) et 2× (largeur native) ; une petite ne l'est qu'en natif.
+  const densites =
+    width >= LARGEUR_MIN_2X
+      ? [
+          { suffixe: '', largeur: Math.round(width / 2) },
+          { suffixe: '@2x', largeur: width },
+        ]
+      : [{ suffixe: '', largeur: width }];
+
+  for (const { suffixe, largeur } of densites) {
     const hauteur = Math.round((largeur / width) * height);
     await source.clone().resize(largeur, hauteur).webp({ quality: 86, effort: 6 }).toFile(`${base}${suffixe}.webp`);
     await source
@@ -369,7 +403,9 @@ async function traiterScene(chemin, identifiant) {
       .jpeg({ quality: 86, mozjpeg: true })
       .toFile(`${base}${suffixe}.jpg`);
   }
-  console.log(`✓ ${identifiant} — scène, ${width}×${height} px en 2× (WebP + JPEG)`);
+  console.log(
+    `✓ ${identifiant} — scène, ${width}×${height} px (${densites.length === 2 ? '1× + 2×' : '1× seul'}, WebP + JPEG)`,
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -405,7 +441,7 @@ if (aTraiter.length === 0) {
 
 for (const [identifiant, source] of aTraiter.sort(([a], [b]) => a.localeCompare(b))) {
   try {
-    if (SCENES.has(identifiant)) await traiterScene(source, identifiant);
+    if (estScene(identifiant)) await traiterScene(source, identifiant);
     else await traiterPackshot(identifiant, { ...options, source });
   } catch (erreur) {
     console.error(`✗ ${identifiant} — ${erreur.message}`);

@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import BarreAnnonce from '../components/BarreAnnonce.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { brand } from '../data/brand';
@@ -7,11 +8,9 @@ import { brand } from '../data/brand';
 interface Props {
   titre: string;
   description: string;
-  /** Header transparent posé sur le visuel du hero (page d’accueil). */
-  headerSurVisuel?: boolean;
 }
 
-const { titre, description, headerSurVisuel = false } = Astro.props;
+const { titre, description } = Astro.props;
 const titreComplet = `${titre} — ${brand.nom}`;
 ---
 
@@ -32,7 +31,7 @@ const titreComplet = `${titre} — ${brand.nom}`;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Jost:wght@300;400;500&family=Noto+Naskh+Arabic:wght@400;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Jost:wght@300;400;500&display=swap"
     />
   </head>
   <body class="bg-lin text-ardoise antialiased">
@@ -42,7 +41,8 @@ const titreComplet = `${titre} — ${brand.nom}`;
     >
       Aller au contenu
     </a>
-    <Header surVisuel={headerSurVisuel} />
+    <BarreAnnonce />
+    <Header />
     <main id="contenu">
       <slot />
     </main>

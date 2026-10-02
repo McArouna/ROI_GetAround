@@ -1,111 +1,158 @@
 ---
 import Logo from './Logo.astro';
-import { brand, navigation } from '../data/brand';
+import { brand } from '../data/brand';
+import { collectionsAffichables, typesAffichables } from '../lib/catalogue';
 
-interface Props {
-  /** Posé en surimpression sur le visuel du hero. */
-  surVisuel?: boolean;
-}
-const { surVisuel = false } = Astro.props;
+const sousMenus = [
+  {
+    libelle: 'Collections',
+    href: '/collection',
+    liens: [
+      { libelle: 'Toutes les pièces', href: '/collection' },
+      ...collectionsAffichables.map((c) => ({ libelle: c.nom, href: `/collection/${c.id}` })),
+    ],
+  },
+  {
+    libelle: 'Pièces',
+    href: '/collection',
+    liens: typesAffichables.map((t) => ({ libelle: t.nom, href: `/collection/${t.id}` })),
+  },
+];
 
-const teinte = surVisuel ? 'text-blanc' : 'text-ardoise';
-const fond = surVisuel ? 'absolute inset-x-0 top-0 z-30' : 'relative border-b border-filet bg-lin';
+const liensSimples = [
+  { libelle: 'L’atelier', href: '/#atelier' },
+  { libelle: 'Contact', href: '#contact' },
+];
 ---
 
-<header class={`${fond} ${teinte}`}>
-  <div class="mx-auto flex max-w-[1240px] items-center justify-between gap-4 px-5 py-4 sm:px-8">
-    <button
-      type="button"
-      id="menu-ouvrir"
-      aria-expanded="false"
-      aria-controls="menu-panneau"
-      class="-ml-2 inline-flex min-h-11 items-center gap-2.5 px-2 text-sm tracking-[0.12em] uppercase"
-    >
-      <span class="flex flex-col gap-[3px]" aria-hidden="true">
-        <span class="block h-px w-4 bg-current"></span>
-        <span class="block h-px w-4 bg-current"></span>
-      </span>
-      Menu
-    </button>
+<header class="sticky top-0 z-30 border-b border-filet bg-lin/95 backdrop-blur-sm">
+  <div class="conteneur grid h-[72px] grid-cols-[1fr_auto_1fr] items-center gap-4">
+    <!-- Gauche : sous-menus (bureau) ou bouton menu (mobile) -->
+    <div class="flex items-center">
+      <button
+        type="button"
+        id="menu-ouvrir"
+        class="-ml-2 inline-flex min-h-11 min-w-11 items-center justify-center lg:hidden"
+        aria-expanded="false"
+        aria-controls="menu-mobile"
+        aria-label="Ouvrir le menu"
+      >
+        <span class="flex flex-col gap-[5px]" aria-hidden="true">
+          <span class="block h-px w-5 bg-ardoise"></span>
+          <span class="block h-px w-5 bg-ardoise"></span>
+          <span class="block h-px w-5 bg-ardoise"></span>
+        </span>
+      </button>
 
-    <a
-      href="/"
-      class="inline-flex min-h-11 items-center gap-2 font-display text-lg tracking-tight sm:text-xl"
-    >
-      <Logo />
-      <span>{brand.nom}</span>
-    </a>
-
-    <a
-      href="/#contact"
-      class="-mr-2 inline-flex min-h-11 items-center px-2 text-sm tracking-[0.12em] uppercase"
-    >
-      Contact
-    </a>
-  </div>
-
-  <!-- Panneau de navigation -->
-  <div
-    id="menu-panneau"
-    hidden
-    class="absolute inset-x-0 top-0 z-40 border-b border-filet bg-lin text-ardoise shadow-[0_18px_40px_-28px_rgba(43,38,34,0.5)]"
-  >
-    <div class="mx-auto max-w-[1240px] px-5 py-4 sm:px-8">
-      <div class="flex items-center justify-between">
-        <span class="surtitre">Navigation</span>
-        <button
-          type="button"
-          id="menu-fermer"
-          class="-mr-2 inline-flex min-h-11 items-center px-2 text-sm tracking-[0.12em] uppercase"
-        >
-          Fermer
-        </button>
-      </div>
-      <nav aria-label="Navigation principale" class="filet mt-3 pt-4">
-        <ul class="flex flex-col gap-1 pb-4">
+      <nav aria-label="Catalogue" class="hidden lg:block">
+        <ul class="flex items-center gap-9">
           {
-            navigation.map((lien) => (
-              <li>
-                <a
-                  href={lien.href}
-                  class="flex min-h-11 items-center font-display text-2xl leading-tight hover:text-argile sm:text-3xl"
-                >
-                  {lien.libelle}
+            sousMenus.map((menu) => (
+              <li class="nav-item">
+                <a href={menu.href} class="nav-lien gap-1.5">
+                  {menu.libelle}
+                  <svg width="9" height="6" viewBox="0 0 9 6" fill="none" aria-hidden="true">
+                    <path d="M1 1l3.5 3.5L8 1" stroke="currentColor" stroke-width="1" />
+                  </svg>
                 </a>
+                <ul class="sous-menu">
+                  {menu.liens.map((lien) => (
+                    <li>
+                      <a href={lien.href}>{lien.libelle}</a>
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))
           }
         </ul>
-        <p class="arabe pb-4 text-lg text-mastic">{brand.baselineArabe}</p>
       </nav>
     </div>
+
+    <!-- Centre : logo -->
+    <a href="/" class="inline-flex min-h-11 items-center gap-2.5 font-display text-xl text-ardoise sm:text-2xl">
+      <Logo class="text-argile" />
+      <span>{brand.nom}</span>
+    </a>
+
+    <!-- Droite -->
+    <nav aria-label="Maison" class="flex justify-end">
+      <ul class="flex items-center gap-9">
+        {
+          liensSimples.map((lien, index) => (
+            <li class:list={[index === 0 && 'hidden lg:block']}>
+              <a href={lien.href} class="nav-lien">
+                {lien.libelle}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+
+  <!-- Menu mobile -->
+  <div id="menu-mobile" hidden class="fixed inset-0 z-50 overflow-y-auto bg-lin lg:hidden">
+    <div class="conteneur flex h-[72px] items-center justify-between border-b border-filet">
+      <span class="font-display text-xl">{brand.nom}</span>
+      <button
+        type="button"
+        id="menu-fermer"
+        class="-mr-2 inline-flex min-h-11 items-center px-2 text-xs uppercase tracking-[0.16em]"
+      >
+        Fermer
+      </button>
+    </div>
+    <nav aria-label="Navigation principale" class="conteneur py-8">
+      {
+        sousMenus.map((menu) => (
+          <div class="mb-8">
+            <p class="surtitre">{menu.libelle}</p>
+            <ul class="mt-3">
+              {menu.liens.map((lien) => (
+                <li>
+                  <a href={lien.href} class="flex min-h-11 items-center font-display text-2xl">
+                    {lien.libelle}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+      <ul class="filet pt-6">
+        {
+          liensSimples.map((lien) => (
+            <li>
+              <a href={lien.href} class="flex min-h-11 items-center font-display text-2xl">
+                {lien.libelle}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
   </div>
 </header>
 
 <script>
   const ouvrir = document.getElementById('menu-ouvrir');
   const fermer = document.getElementById('menu-fermer');
-  const panneau = document.getElementById('menu-panneau');
+  const panneau = document.getElementById('menu-mobile');
 
   if (ouvrir && fermer && panneau) {
-    const basculer = (ouvert: boolean) => {
+    const basculer = (ouvert: boolean, rendreFocus = true) => {
       panneau.hidden = !ouvert;
       ouvrir.setAttribute('aria-expanded', String(ouvert));
-      if (ouvert) {
-        fermer.focus();
-      } else {
-        ouvrir.focus();
-      }
+      document.documentElement.style.overflow = ouvert ? 'hidden' : '';
+      if (ouvert) fermer.focus();
+      else if (rendreFocus) ouvrir.focus();
     };
-
     ouvrir.addEventListener('click', () => basculer(true));
     fermer.addEventListener('click', () => basculer(false));
-    panneau.querySelectorAll('a').forEach((lien) => {
-      lien.addEventListener('click', () => {
-        panneau.hidden = true;
-        ouvrir.setAttribute('aria-expanded', 'false');
-      });
-    });
+    panneau.querySelectorAll('a').forEach((lien) =>
+      lien.addEventListener('click', () => basculer(false, false)),
+    );
     document.addEventListener('keydown', (evenement) => {
       if (evenement.key === 'Escape' && !panneau.hidden) basculer(false);
     });

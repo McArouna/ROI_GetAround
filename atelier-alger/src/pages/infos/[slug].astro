@@ -1,0 +1,23 @@
+---
+import Base from '../../layouts/Base.astro';
+import { pagesInfos, type PageInfo } from '../../data/infos';
+
+export function getStaticPaths() {
+  return pagesInfos.map((page) => ({ params: { slug: page.slug }, props: { page } }));
+}
+
+const { page } = Astro.props as { page: PageInfo };
+---
+
+<Base titre={page.titre} description={page.paragraphes[0]}>
+  <section class="section">
+    <div class="conteneur">
+      <div class="max-w-2xl">
+        <h1 class="text-4xl sm:text-5xl">{page.titre}</h1>
+        <div class="mt-8 space-y-4 leading-relaxed text-mastic">
+          {page.paragraphes.map((paragraphe) => <p>{paragraphe}</p>)}
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

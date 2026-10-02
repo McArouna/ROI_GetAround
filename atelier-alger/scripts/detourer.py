@@ -31,7 +31,12 @@ from pathlib import Path
 SOURCES = Path("sources")
 SORTIE = SOURCES / "detoures"
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
-SCENES = {"hero-nature-morte", "atelier-mains", "atelier-sechage", "sortie-de-four"}
+SCENES = {"hero-nature-morte", "atelier-ambiance", "atelier-mains", "atelier-sechage", "sortie-de-four"}
+
+
+def est_scene(identifiant: str) -> bool:
+    """Photo d'ambiance ou gros plan de détail : pas de détourage."""
+    return identifiant in SCENES or "-detail-" in identifiant
 
 
 def main() -> int:
@@ -48,7 +53,7 @@ def main() -> int:
         for f in SOURCES.iterdir()
         if f.is_file()
         and f.suffix.lower() in EXTENSIONS
-        and f.stem not in SCENES
+        and not est_scene(f.stem)
         and (not demandes or f.stem in demandes)
     )
     if not fichiers:

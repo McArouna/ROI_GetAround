@@ -1,0 +1,21 @@
+---
+/**
+ * Barre d'annonce fine et défilante. Les messages sont dupliqués pour que la
+ * boucle soit continue ; la copie est masquée aux lecteurs d'écran, et la
+ * barre s'immobilise si l'utilisateur limite les animations.
+ */
+import { annonces } from '../data/brand';
+
+const groupe = [...annonces, ...annonces];
+---
+
+<div class="annonce" role="region" aria-label="Informations">
+  <div class="annonce__piste">
+    <p class="annonce__groupe">
+      {groupe.map((message) => <span class="annonce__message">{message}</span>)}
+    </p>
+    <p class="annonce__groupe" aria-hidden="true">
+      {groupe.map((message) => <span class="annonce__message">{message}</span>)}
+    </p>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+---
+import ListePieces from '../../components/ListePieces.astro';
+import { piecesAffichables } from '../../lib/catalogue';
+---
+
+<ListePieces
+  titre="Toutes les pièces"
+  intro="Céramique peinte à la main dans les ateliers d’Alger, de Kabylie, du M’zab et de Tlemcen. Chaque pièce nomme la main qui l’a faite."
+  pieces={piecesAffichables}
+  actif="tout"
+/>

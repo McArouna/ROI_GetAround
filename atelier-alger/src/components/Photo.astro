@@ -1,11 +1,8 @@
 ---
 /**
- * Photo d'ambiance (scène d'atelier, portrait d'artisan, nature morte).
- *
- * À distinguer du packshot : ici l'image est un cadrage photographique, donc
- * `object-fit: cover` dans le ratio demandé, sans ombre portée — l'ombre
- * appartient à la scène. Même exigence technique : WebP + JPEG de repli,
- * 1× et 2×, `lazy` par défaut.
+ * Photo d'ambiance (atelier, artisan, nature morte).
+ * Cadrage photographique (`cover`), sans ombre ajoutée. `arche` lui donne
+ * le cadre en arche réservé aux ambiances — jamais aux produits.
  */
 import { jeuImage } from '../lib/images';
 
@@ -13,44 +10,36 @@ interface Props {
   /** Chemin de base, sans extension. */
   src: string;
   alt: string;
-  legende?: string;
-  /** Ratio CSS du cadre, ex. « 3 / 4 ». */
+  /** Ratio CSS du cadre, ex. « 3 / 4 ». Ignoré si `plein`. */
   ratio?: string;
+  arche?: boolean;
+  /** Remplit son conteneur au lieu de tenir un ratio. */
+  plein?: boolean;
   priorite?: boolean;
   tailles?: string;
-  /** Fond du repère d'attente. */
-  variante?: 'sombre' | 'creme';
-  /** Remplit son conteneur (hero) au lieu de tenir un ratio. */
-  plein?: boolean;
   class?: string;
 }
 
 const {
   src,
   alt,
-  legende,
   ratio = '3 / 4',
+  arche = false,
+  plein = false,
   priorite = false,
   tailles,
-  variante = 'creme',
-  plein = false,
   class: classe = '',
 } = Astro.props;
 
-const jeu = jeuImage(src, 'jpg');
-const classes = [
-  'photo',
-  variante === 'sombre' ? 'photo--sombre' : 'photo--creme',
-  plein ? 'photo--plein' : '',
-  classe,
-]
-  .filter(Boolean)
-  .join(' ');
+const jeu = jeuImage(src);
 ---
 
-<figure class={classes} style={plein ? undefined : `aspect-ratio: ${ratio};`}>
+<figure
+  class:list={['photo', arche && 'photo--arche', classe]}
+  style={plein ? undefined : `aspect-ratio: ${ratio};`}
+>
   {
-    jeu.existe ? (
+    jeu.existe && (
       <picture>
         <source type="image/webp" srcset={jeu.webp} sizes={tailles} />
         <source type={jeu.typeRepli} srcset={jeu.repli} sizes={tailles} />
@@ -63,11 +52,6 @@ const classes = [
           class="photo__image"
         />
       </picture>
-    ) : (
-      <div class="photo__attente" role="img" aria-label={alt}>
-        {legende && <span class="packshot__nom">{legende}</span>}
-        <span class="packshot__mention">Photo à venir</span>
-      </div>
     )
   }
 </figure>

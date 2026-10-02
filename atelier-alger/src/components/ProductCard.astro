@@ -1,62 +1,31 @@
 ---
 import Packshot from './Packshot.astro';
 import { getArtisan } from '../data/artisans';
-import { getCategorie } from '../data/categories';
 import type { Product } from '../data/products';
 
 interface Props {
   produit: Product;
-  /** Fond de la section qui accueille la carte. */
-  variante?: 'sombre' | 'creme';
   /** Largeur d'affichage de la vignette, pour le choix de densité. */
   tailles?: string;
 }
 
-const {
-  produit,
-  variante = 'creme',
-  tailles = '(min-width: 1024px) 24vw, (min-width: 640px) 44vw, 90vw',
-} = Astro.props;
-
+const { produit, tailles = '(min-width: 1024px) 23vw, 45vw' } = Astro.props;
 const artisan = getArtisan(produit.artisan);
-const categorie = getCategorie(produit.categorie);
-const surSombre = variante === 'sombre';
 ---
 
-<article class="flex h-full flex-col">
-  <a href={`/produits/${produit.id}`} class="group flex h-full flex-col rounded-xs">
+<article>
+  <a href={`/produits/${produit.id}`} class="group block rounded-xs">
     <Packshot
       src={produit.image}
-      alt={`${produit.nom} — ${categorie.nom}, peint par ${artisan.nom} à ${produit.ville}`}
-      legende={produit.nom}
-      variante={variante}
-      survol={true}
+      alt={`${produit.nom}, peint par ${artisan.nom} à ${produit.ville}`}
+      badge={produit.reservee ? 'Réservé' : undefined}
       tailles={tailles}
     />
-    <div class="flex flex-1 flex-col pt-5">
-      <div class="flex items-baseline justify-between gap-4">
-        <h3
-          class:list={[
-            'font-display text-lg leading-snug transition-colors',
-            surSombre ? 'text-lin group-hover:text-blanc' : 'text-ardoise group-hover:text-argile',
-          ]}
-        >
-          {produit.nom}
-        </h3>
-        <span class={`shrink-0 text-sm ${surSombre ? 'text-lin/80' : 'text-ardoise'}`}>
-          {produit.prix}
-        </span>
-      </div>
-      {
-        produit.nomArabe && (
-          <p class={`arabe mt-1 text-base ${surSombre ? 'text-lin/60' : 'text-mastic'}`} aria-hidden="true">
-            {produit.nomArabe}
-          </p>
-        )
-      }
-      <p class={`mt-1.5 text-sm sm:mt-auto sm:pt-1.5 ${surSombre ? 'text-lin/70' : 'text-mastic'}`}>
-        Peint par <span class={surSombre ? 'text-lin' : 'text-teal-profond'}>{artisan.nom}</span> — {produit.ville}
-      </p>
+    <div class="mt-4 flex items-baseline justify-between gap-3">
+      <h3 class="font-display text-[1.0625rem] leading-snug text-ardoise group-hover:text-argile">
+        {produit.nom}
+      </h3>
+      <p class="shrink-0 text-sm text-mastic">{produit.prix}</p>
     </div>
   </a>
 </article>

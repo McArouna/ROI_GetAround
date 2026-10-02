@@ -6,7 +6,7 @@
 export const categories = [
   {
     id: 'mugs',
-    nom: 'Mugs & tasses',
+    nom: 'Tasses & gobelets',
     intro:
       'Le premier café du matin dans une pièce peinte à la main : motifs amazighs, calligraphie, khamsa.',
   },
@@ -35,12 +35,12 @@ export const categories = [
   },
   {
     id: 'gourdes',
-    nom: 'Gourdes & qraba',
-    intro: 'La forme de la gourde d’eau traditionnelle, émaillée ou peinte de scènes de la Casbah.',
+    nom: 'Qraba & fioles',
+    intro: 'La gourde d’eau traditionnelle et ses cousines bouchées de liège, émaillées ou peintes.',
   },
   {
     id: 'pichets',
-    nom: 'Pichets & carafes',
+    nom: 'Pichets & services',
     intro: 'Rayures posées à main levée, becs tirés au pouce, anses montées à part.',
   },
   {

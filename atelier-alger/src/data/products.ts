@@ -1,5 +1,6 @@
 import { PRIX_PLACEHOLDER } from './brand';
 import type { CategorieId } from './categories';
+import type { CollectionId } from './collections';
 
 /**
  * Catalogue produit.
@@ -15,8 +16,6 @@ export interface Product {
   /** Slug URL, en minuscules, sans accent. */
   id: string;
   nom: string;
-  /** Accent arabe facultatif, affiché en Noto Naskh Arabic. */
-  nomArabe?: string;
   categorie: CategorieId;
   /** Référence vers src/data/artisans.ts. */
   artisan: string;
@@ -38,6 +37,10 @@ export interface Product {
   galerie: string[];
   /** Mise en avant sur la page d’accueil. */
   vedette?: boolean;
+  /** Pièce déjà réservée : badge « Réservé », bouton désactivé. */
+  reservee?: boolean;
+  /** Collection régionale, si elle diffère de celle de l'artisan. */
+  collection?: CollectionId;
   tracabilite: {
     argile: string;
     technique: string;
@@ -94,7 +97,6 @@ export const products: Product[] = [
   {
     id: 'mug-sabah-el-kheir',
     nom: 'Mug Sabah el-Kheir',
-    nomArabe: 'صباح الخير',
     categorie: 'mugs',
     artisan: 'yasmine',
     ville: 'Alger',
@@ -118,7 +120,6 @@ export const products: Product[] = [
   {
     id: 'tasse-khamsa',
     nom: 'Tasse Khamsa',
-    nomArabe: 'خمسة',
     categorie: 'mugs',
     artisan: 'yasmine',
     ville: 'Alger',
@@ -137,6 +138,30 @@ export const products: Product[] = [
       entretien: 'Lavage à la main, eau tiède, sans abrasif',
     },
     commerce: commerce('MUG-KHA-01'),
+  },
+
+  {
+    id: 'gobelets-rayes',
+    nom: 'Gobelets rayés, la paire',
+    categorie: 'mugs',
+    artisan: 'karim',
+    ville: 'Ghardaïa',
+    description: 'Rayures fines tirées au tour, lèvre en terre nue ; ils s’emboîtent pour se ranger.',
+    descriptionLongue:
+      'Le pinceau reste immobile, c’est le gobelet qui tourne : la spirale ne se referme jamais tout à fait au même endroit. La lèvre est laissée sans émail, en terre cuite, comme un liseré. Vendus par deux, ils s’emboîtent l’un dans l’autre.',
+    prix: PRIX_PLACEHOLDER,
+    image: '/products/gobelets-rayes',
+    galerie: [],
+    vedette: true,
+    reservee: true,
+    tracabilite: {
+      argile: 'Faïence blanche, [fournisseur à préciser]',
+      technique: 'Tournage, rayures au tour',
+      cuisson: 'Deux cuissons, [1 020 °C]',
+      dimensions: '[H 8 cm — Ø 8 cm, la paire]',
+      entretien: 'Contact alimentaire ; lavage à la main',
+    },
+    commerce: commerce('MUG-RAY-02', 'serie'),
   },
 
   /* --------------------------------- Bols --------------------------------- */
@@ -217,7 +242,7 @@ export const products: Product[] = [
     description:
       'Couvercle conique couvert de fleurs peintes, plat et bord unis. Décoratif — il ne va pas sur le feu.',
     descriptionLongue:
-      'Le bouquet part de la pointe du couvercle et descend en spirale jusqu’au bord : il faut tourner la pièce pendant qu’on peint, ce que [Sofiane] fait sur une girelle de bois. Les couleurs sont posées à plat, puis cernées d’un trait brun qui les tient. Pièce décorative : elle se pose au centre de la table, garnie de dattes ou de gâteaux.',
+      'Le bouquet part de la pointe du couvercle et descend en spirale jusqu’au bord : il faut tourner la pièce pendant qu’on peint, ce que Sofiane fait sur une girelle de bois. Les couleurs sont posées à plat, puis cernées d’un trait brun qui les tient. Pièce décorative : elle se pose au centre de la table, garnie de dattes ou de gâteaux.',
     prix: PRIX_PLACEHOLDER,
     image: '/products/tajine-fleurs-de-nedroma',
     galerie: [
@@ -237,7 +262,6 @@ export const products: Product[] = [
   {
     id: 'tajine-dhahab',
     nom: 'Tajine Dhahab',
-    nomArabe: 'ذهب',
     categorie: 'tajines',
     artisan: 'sofiane',
     ville: 'Nedroma',
@@ -281,6 +305,28 @@ export const products: Product[] = [
     commerce: commerce('ASS-BEJ-01', 'serie'),
   },
   {
+    id: 'assiette-rayee-ghardaia',
+    nom: 'Assiette Rayures de Ghardaïa',
+    categorie: 'assiettes',
+    artisan: 'karim',
+    ville: 'Ghardaïa',
+    description: 'Larges bandes terre cuite posées au pinceau plat, d’un bord à l’autre, sur fond blanc.',
+    descriptionLongue:
+      'Chaque bande traverse l’assiette d’un seul geste, le pinceau chargé une fois. La largeur varie avec la pression de la main, et c’est ce qui donne à la pièce son mouvement. Elle appartient au même service que le pichet et les gobelets rayés.',
+    prix: PRIX_PLACEHOLDER,
+    image: '/products/assiette-rayee-ghardaia',
+    galerie: [],
+    vedette: true,
+    tracabilite: {
+      argile: 'Faïence blanche, [fournisseur à préciser]',
+      technique: 'Calibrage, bandes au pinceau plat',
+      cuisson: 'Deux cuissons, [1 020 °C]',
+      dimensions: '[Ø 26 cm]',
+      entretien: 'Contact alimentaire ; lavage à la main',
+    },
+    commerce: commerce('ASS-GHA-01', 'serie'),
+  },
+  {
     id: 'plat-bord-safran',
     nom: 'Plat Bord Safran',
     categorie: 'assiettes',
@@ -306,7 +352,6 @@ export const products: Product[] = [
   {
     id: 'plateau-baklawa',
     nom: 'Plateau Baklawa',
-    nomArabe: 'بقلاوة',
     categorie: 'plateaux',
     artisan: 'lilia',
     ville: 'Constantine',
@@ -377,17 +422,16 @@ export const products: Product[] = [
   {
     id: 'qraba-casbah',
     nom: 'Qraba Casbah',
-    nomArabe: 'قربة',
     categorie: 'gourdes',
     artisan: 'yasmine',
     ville: 'Alger',
     description:
       'Une ruelle entière peinte sur une face : porte cloutée à encadrement de zellige, arcades, escaliers, et deux femmes en haïk qui descendent.',
     descriptionLongue:
-      'La forme vient des gourdes qu’on emportait aux champs : panse plate, col court, petite anse percée. [Yasmine] y peint une ruelle réelle, du sol vers le haut — le calepinage des pavés d’abord, puis les femmes en haïk, puis les arcades et le linge de lumière au fond. Le col reçoit une frise bleue en chevrons, seule géométrie d’une pièce qui, pour le reste, est une scène. Le blanc du fond n’est pas peint : c’est l’émail laissé nu.',
+      'La forme vient des gourdes qu’on emportait aux champs : panse plate, col court, petite anse percée. Yasmine y peint une ruelle réelle, du sol vers le haut — le calepinage des pavés d’abord, puis les femmes en haïk, puis les arcades et le linge de lumière au fond. Le col reçoit une frise bleue en chevrons, seule géométrie d’une pièce qui, pour le reste, est une scène. Le blanc du fond n’est pas peint : c’est l’émail laissé nu.',
     prix: PRIX_PLACEHOLDER,
     image: '/products/qraba-casbah',
-    galerie: ['/products/qraba-casbah-2', '/products/qraba-casbah-3'],
+    galerie: ['/products/qraba-casbah-detail-1', '/products/qraba-casbah-detail-2'],
     vedette: true,
     tracabilite: {
       argile: 'Terre rouge, [carrière à préciser]',
@@ -401,7 +445,6 @@ export const products: Product[] = [
   {
     id: 'qraba-el-khat',
     nom: 'Qraba El Khat',
-    nomArabe: 'خط',
     categorie: 'gourdes',
     artisan: 'yasmine',
     ville: 'Alger',
@@ -425,14 +468,13 @@ export const products: Product[] = [
   {
     id: 'qraba-zahra',
     nom: 'Qraba Zahra',
-    nomArabe: 'زهرة',
     categorie: 'gourdes',
     artisan: 'sofiane',
     ville: 'Nedroma',
     description:
       'Un champ de fleurs roses à cœur grenat, feuilles vertes en épis, couvrant la panse d’un bord à l’autre.',
     descriptionLongue:
-      'Chaque fleur part du cœur : un point grenat, puis les pétales tirés vers l’extérieur d’un coup de pinceau qui s’allège en finissant. Les feuilles sont posées entre elles, en épis, pour combler le blanc sans jamais le fermer tout à fait. [Sofiane] en peint une vingtaine par face et ne les compte pas : il s’arrête quand la panse est pleine.',
+      'Chaque fleur part du cœur : un point grenat, puis les pétales tirés vers l’extérieur d’un coup de pinceau qui s’allège en finissant. Les feuilles sont posées entre elles, en épis, pour combler le blanc sans jamais le fermer tout à fait. Sofiane en peint une vingtaine par face et ne les compte pas : il s’arrête quand la panse est pleine.',
     prix: PRIX_PLACEHOLDER,
     image: '/products/qraba-zahra',
     galerie: ['/products/qraba-zahra-2'],
@@ -445,6 +487,53 @@ export const products: Product[] = [
       entretien: 'Décorative — essuyer à sec, bouchon à retirer avant nettoyage',
     },
     commerce: commerce('GOU-ZAH-01'),
+  },
+  {
+    id: 'fiole-vert-olive',
+    nom: 'Fiole Vert olive',
+    categorie: 'gourdes',
+    artisan: 'nawel',
+    ville: 'Maatkas',
+    description:
+      'Panse ronde, émail vert olive épais, un signe amazigh peint en jaune et ponctué de six points bleus.',
+    descriptionLongue:
+      'Les sillons du tour restent visibles sous l’émail : on les sent du bout des doigts. Le signe est posé au pinceau sur l’émail cru, en jaune tendre, puis encadré de six points bleus, trois de chaque côté. Le liège est taillé pièce par pièce, car aucun col n’a tout à fait le même diamètre.',
+    prix: PRIX_PLACEHOLDER,
+    image: '/products/fiole-vert-olive',
+    galerie: [],
+    vedette: true,
+    tracabilite: {
+      argile: 'Terre rouge, [carrière à préciser]',
+      technique: 'Tournage, émail coloré, décor au pinceau sur émail cru',
+      cuisson: 'Deux cuissons, [1 020 °C]',
+      dimensions: '[H 20 cm — Ø 16 cm]',
+      entretien: 'Décorative — essuyer à sec',
+    },
+    commerce: commerce('GOU-OLI-01'),
+  },
+  {
+    id: 'fiole-safran',
+    nom: 'Fiole Safran',
+    categorie: 'gourdes',
+    artisan: 'nawel',
+    ville: 'Maatkas',
+    description:
+      'La même panse ronde dans un jaune safran profond, le même signe amazigh posé à main levée.',
+    descriptionLongue:
+      'Sœur de la Fiole Vert olive, tournée le même jour et émaillée d’un jaune safran qui fonce là où l’émail s’accumule, au bas de la panse. Le signe est peint en vert anis : posé côte à côte, les deux fioles ne se ressemblent que de loin.',
+    prix: PRIX_PLACEHOLDER,
+    image: '/products/fiole-safran',
+    galerie: [],
+    vedette: true,
+    reservee: true,
+    tracabilite: {
+      argile: 'Terre rouge, [carrière à préciser]',
+      technique: 'Tournage, émail coloré, décor au pinceau sur émail cru',
+      cuisson: 'Deux cuissons, [1 020 °C]',
+      dimensions: '[H 20 cm — Ø 16 cm]',
+      entretien: 'Décorative — essuyer à sec',
+    },
+    commerce: commerce('GOU-SAF-01'),
   },
   {
     id: 'gourde-haik',
@@ -492,23 +581,24 @@ export const products: Product[] = [
 
   /* -------------------------- Pichets & carafes --------------------------- */
   {
-    id: 'pichet-rayures-de-ghardaia',
-    nom: 'Pichet Rayures de Ghardaïa',
+    id: 'service-rayures-ghardaia',
+    nom: 'Service Rayures de Ghardaïa',
     categorie: 'pichets',
     artisan: 'karim',
     ville: 'Ghardaïa',
-    description: 'Rayures horizontales tirées pendant que la pièce tourne encore. Bec pincé au pouce.',
+    description:
+      'Le pichet à larges bandes, l’assiette assortie et les gobelets rayés : la table du thé ou de la citronnade.',
     descriptionLongue:
-      'Les rayures sont posées sur le tour, pinceau tenu immobile pendant que la pièce défile : la largeur varie avec la vitesse, ce qui donne ces bandes qui respirent. Le bec est tiré au pouce, à main levée, dernier geste avant le séchage.',
+      'Les bandes du pichet sont posées au pinceau plat, de haut en bas, en une seule descente chacune. Celles des gobelets sont tirées au tour : le pinceau reste immobile et c’est la pièce qui tourne, d’où ces spirales qui ne se referment jamais tout à fait. Un même engobe terre cuite pour toute la série, une même main.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/pichet-rayures-de-ghardaia',
-    galerie: ['/products/pichet-rayures-de-ghardaia-2'],
+    image: '/products/service-rayures-ghardaia',
+    galerie: ['/products/assiette-rayee-ghardaia', '/products/gobelets-rayes'],
     vedette: true,
     tracabilite: {
-      argile: 'Grès chamotté, [carrière à préciser]',
-      technique: 'Tournage, rayures au tour',
-      cuisson: 'Grès, [1 250 °C]',
-      dimensions: '[H 22 cm — 1,1 L]',
+      argile: 'Faïence blanche, [fournisseur à préciser]',
+      technique: 'Tournage, bandes au pinceau plat, rayures au tour',
+      cuisson: 'Deux cuissons, [1 020 °C]',
+      dimensions: '[Pichet H 22 cm — 1,1 L ; assiette Ø 26 cm]',
       entretien: 'Contact alimentaire ; lavage à la main',
     },
     commerce: commerce('PIC-GHA-01', 'serie'),
@@ -585,7 +675,6 @@ export const products: Product[] = [
   {
     id: 'main-de-fatma-murale',
     nom: 'Main de Fatma murale',
-    nomArabe: 'خميسة',
     categorie: 'mains',
     artisan: 'yasmine',
     ville: 'Alger',
@@ -630,7 +719,6 @@ export const products: Product[] = [
   {
     id: 'savon-fleur-oranger',
     nom: 'Savon Fleur d’oranger',
-    nomArabe: 'زهر',
     categorie: 'savons',
     artisan: 'amina',
     ville: 'Béjaïa',
@@ -676,7 +764,6 @@ export const products: Product[] = [
   {
     id: 'def-peint',
     nom: 'Def peint',
-    nomArabe: 'دف',
     categorie: 'art-mural',
     artisan: 'lilia',
     ville: 'Constantine',
@@ -721,7 +808,6 @@ export const products: Product[] = [
   {
     id: 'affiche-alger-la-blanche',
     nom: 'Affiche Alger la Blanche',
-    nomArabe: 'الجزائر البيضاء',
     categorie: 'art-mural',
     artisan: 'lilia',
     ville: 'Constantine',
@@ -758,3 +844,6 @@ export function produitsParCategorie(categorie: CategorieId): Product[] {
 export function toutesLesImages(): string[] {
   return products.flatMap((p) => [p.image, ...p.galerie]);
 }
+
+/** Pièce mise à la une sur la page d'accueil. */
+export const ID_PIECE_A_LA_UNE = 'qraba-casbah';

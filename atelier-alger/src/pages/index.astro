@@ -4,282 +4,256 @@ import Packshot from '../components/Packshot.astro';
 import Photo from '../components/Photo.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { brand } from '../data/brand';
-import { produitsVedette, products } from '../data/products';
-import { artisans } from '../data/artisans';
-import { photosDabord } from '../lib/images';
+import { artisans, getArtisan } from '../data/artisans';
+import { getCategorie } from '../data/categories';
+import { collections, getCollection } from '../data/collections';
+import { ID_PIECE_A_LA_UNE, getProduct } from '../data/products';
+import {
+  piecesAffichables,
+  piecesDeLaCollection,
+  piecesDuType,
+  vuesDisponibles,
+} from '../lib/catalogue';
 
-const misesEnAvant = photosDabord(produitsVedette);
-const vignettes = misesEnAvant.slice(0, 3);
-const grille = misesEnAvant.slice(0, 8);
-const nombreArtisans = artisans.length;
+/* ---- Pièce à la une ---- */
+const aLaUne = getProduct(ID_PIECE_A_LA_UNE) ?? piecesAffichables[0];
+const artisanUne = getArtisan(aLaUne.artisan);
+const vuesUne = vuesDisponibles(aLaUne).slice(0, 2);
+const sujetReservation = encodeURIComponent(`Réservation — ${aLaUne.nom} (${aLaUne.commerce.sku})`);
 
-const valeurs = [
-  {
-    titre: 'Pièce unique',
-    texte:
-      'Aucune série industrielle. Le pinceau ne repasse jamais deux fois au même endroit : votre bol ne ressemble à aucun autre.',
-  },
-  {
-    titre: 'Fait main',
-    texte:
-      'Tournées, modelées au colombin ou montées en plaque, puis peintes à main levée. Aucun décalque, aucun pochoir.',
-  },
-  {
-    titre: 'Éthique & durable',
-    texte:
-      'Rémunération convenue avec l’atelier avant la première cuisson, emballage sans plastique, expédition groupée.',
-  },
-  {
-    titre: 'Traçabilité',
-    texte:
-      'Chaque pièce nomme sa main, son atelier et sa ville. Vous savez qui l’a peinte et où elle est née.',
-  },
+/* ---- Rangées : un type de pièce, puis une collection régionale ----
+   Une pièce n'apparaît qu'une fois sur la page : chaque rangée écarte ce qui
+   est déjà montré au-dessus. « Tout afficher » mène à la liste complète. */
+const dejaMontres = new Set([aLaUne.id]);
+const rangee = (titre: string, sousTitre: string, href: string, pieces: typeof piecesAffichables) => {
+  const choisies = pieces.filter((p) => !dejaMontres.has(p.id)).slice(0, 4);
+  choisies.forEach((p) => dejaMontres.add(p.id));
+  return { titre, sousTitre, href, pieces: choisies };
+};
+
+const typeQraba = getCategorie('gourdes');
+const collectionBerbere = getCollection('terres-berberes');
+const rangees = [
+  rangee(typeQraba.nom, typeQraba.intro, `/collection/${typeQraba.id}`, piecesDuType(typeQraba.id)),
+  rangee(
+    collectionBerbere.nom,
+    collectionBerbere.intro,
+    `/collection/${collectionBerbere.id}`,
+    piecesDeLaCollection(collectionBerbere.id),
+  ),
+].filter((r) => r.pieces.length > 0);
+
+const reassurances = [
+  'Peinte à la main : deux pièces ne sont jamais tout à fait identiques.',
+  'Réservation par e-mail : la pièce vous est confirmée avant tout paiement.',
+  'Emballée à la main, expédiée depuis l’Algérie vers la France.',
+];
+
+/* ---- Chiffres clés : tirés des données, aucun chiffre inventé ---- */
+const chiffres = [
+  { valeur: String(artisans.length), libelle: 'ateliers partenaires' },
+  { valeur: String(collections.length), libelle: 'régions d’Algérie' },
+  { valeur: '100 %', libelle: 'peint à la main' },
 ];
 ---
 
-<Base
-  titre="Céramique algérienne peinte à la main"
-  description={brand.accroche}
-  headerSurVisuel={true}
->
-  <!-- ------------------------------- Hero ------------------------------- *
-       La nature morte n'est pas posée sur la page : elle est fondue dans le
-       fond charbon par un voile de dégradé, et les vignettes sont des
-       produits détourés posés directement sur ce même fond. Un seul univers.
-  ------------------------------------------------------------------------ -->
-  <section class="relative overflow-hidden bg-ardoise text-lin">
-    <div
-      class="relative z-10 mx-auto max-w-[1240px] px-5 pb-10 pt-28 sm:px-8 sm:pt-32 lg:pb-24 lg:pr-[52%] lg:pt-36"
-    >
-      <p class="surtitre text-lin/70">Alger — Tlemcen — Ghardaïa — Kabylie</p>
-      <h1 class="mt-5 max-w-2xl text-[2.6rem] leading-[1.03] sm:text-6xl lg:text-7xl">
-        <em class="italic">La main</em> avant l’objet,<br class="hidden sm:block" />
-        {' '}<em class="italic">la terre</em> avant le décor.
-      </h1>
-      <p class="mt-6 max-w-md text-base leading-relaxed text-lin/80">{brand.accroche}</p>
-      <p class="arabe mt-3 max-w-md text-xl text-lin/70">{brand.baselineArabe}</p>
-
-      <div class="mt-8 flex flex-wrap items-center gap-3">
-        <a href="/collection" class="btn btn-primaire-sombre">Voir la collection</a>
-        <a href="#philosophie" class="btn btn-clair">L’atelier</a>
-      </div>
-
-      <!-- Trois vignettes : produits détourés sur le charbon, sans carte. -->
-      <ul class="mt-12 grid max-w-lg grid-cols-3 gap-4 sm:gap-7">
-        {
-          vignettes.map((produit) => (
-            <li>
-              <a href={`/produits/${produit.id}`} class="group block rounded-xs">
-                <Packshot
-                  src={produit.image}
-                  alt={`${produit.nom} — voir la pièce`}
-                  legende={produit.nom}
-                  variante="sombre"
-                  survol={true}
-                  priorite={true}
-                  tailles="(min-width: 1024px) 11vw, 27vw"
-                />
-                <span class="mt-2 block text-xs leading-snug text-lin/70 group-hover:text-lin">
-                  {produit.nom}
-                </span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-
-    <!-- Grande nature morte : en bas du hero sur mobile, moitié droite sur
-         grand écran. Le voile assure le raccord avec le fond de section. -->
-    <div
-      class="hero-photo relative h-[68vw] w-full sm:h-[56vw] lg:absolute lg:inset-y-0 lg:left-[46%] lg:right-0 lg:h-auto lg:w-auto"
-    >
+<Base titre="Céramique algérienne peinte à la main" description={brand.accroche}>
+  <!-- --------------------------------------------------------------- *
+       Hero : la nature morte en entier, en fond. Le texte se pose sur le
+       mur vert à droite de la scène (grand écran) ou sous l'image (mobile).
+  ---------------------------------------------------------------- -->
+  <section class="relative bg-vert-atelier text-lin" aria-labelledby="titre-hero">
+    <div class="relative aspect-[1983/793] w-full">
       <Photo
         src="/products/hero-nature-morte"
-        alt="Nature morte d’atelier : qraba calligraphiée, deux tasses peintes et un anthurium sur fond vert"
-        legende="Nature morte d’atelier"
-        variante="sombre"
+        alt="Nature morte d’atelier : qraba calligraphiée, deux tasses peintes et une feuille d’anthurium sur fond vert"
         plein={true}
         priorite={true}
-        tailles="(min-width: 1024px) 54vw, 100vw"
+        tailles="100vw"
+        class="absolute inset-0"
       />
-      <div class="hero-voile"></div>
+      <!-- Raccord avec la bande de texte, sur mobile uniquement -->
+      <div
+        class="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-vert-atelier to-transparent md:hidden"
+        aria-hidden="true"
+      >
+      </div>
+    </div>
+
+    <div
+      class="conteneur relative pb-12 pt-4 md:absolute md:inset-0 md:flex md:items-center md:justify-end md:py-0"
+    >
+      <div class="max-w-sm md:mr-[2%] lg:mr-[5%]">
+        <h1 id="titre-hero" class="text-4xl leading-[1.05] sm:text-5xl lg:text-6xl">
+          La main <em class="italic">avant</em> l’objet.
+        </h1>
+        <p class="mt-4 text-base leading-relaxed text-lin/85">{brand.accroche}</p>
+        <a href="/collection" class="btn btn-primaire mt-7">Découvrir les pièces</a>
+      </div>
     </div>
   </section>
 
-  <!-- ---------------------------- Philosophie ---------------------------- -->
-  <section id="philosophie" class="bg-lin">
-    <div class="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 sm:py-24">
-      <div class="grid gap-12 lg:grid-cols-[1fr_1fr] lg:gap-16">
-        <div class="lg:pr-6">
-          <p class="surtitre">L’atelier</p>
-          <h2 class="mt-5 max-w-lg text-4xl leading-[1.06] sm:text-5xl">
-            Posséder une pièce <em class="italic text-argile">aussi unique</em> que vous.
-          </h2>
-          <div class="mt-6 max-w-md space-y-4 text-base leading-relaxed text-mastic">
-            <p>
-              Une tasse peinte à la main n’est jamais tout à fait droite. Le trait s’épaissit là où
-              la main ralentit, l’émail s’accumule au bas de la panse, un pouce laisse sa trace sous
-              l’anse. Ces écarts ne sont pas des défauts rattrapés au dernier moment : ils sont ce
-              qui reste de la personne qui a fabriqué l’objet.
-            </p>
-            <p>
-              Nous travaillons avec {nombreArtisans} ateliers, de la Casbah d’Alger aux collines de
-              Kabylie. Nous ne leur demandons pas de reproduire un modèle à l’identique — nous leur
-              demandons de peindre ce qu’ils savent peindre, et nous acceptons que deux pièces d’une
-              même série ne soient pas jumelles.
-            </p>
-            <p>
-              Ce que vous posez sur votre table à Paris, à Lyon ou à Marseille a séché sur une
-              terrasse, attendu son tour devant un four, et voyagé emballé dans du papier. C’est un
-              objet qui a une adresse.
-            </p>
-          </div>
-          <a href="/collection" class="btn btn-ligne mt-8">Découvrir les pièces</a>
+  <!-- ------------------------- Pièce à la une ------------------------ -->
+  <section class="section" aria-labelledby="titre-une">
+    <div class="conteneur">
+      <div class="grid items-center gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-20">
+        <div class:list={['grid gap-3', vuesUne.length > 0 && 'grid-cols-[2fr_1fr]']}>
+          <a href={`/produits/${aLaUne.id}`} class="block rounded-xs" aria-label={`Voir la pièce ${aLaUne.nom}`}>
+            <Packshot
+              src={aLaUne.image}
+              alt={`${aLaUne.nom}, vue principale`}
+              tailles="(min-width: 1024px) 40vw, 62vw"
+            />
+          </a>
+          {
+            vuesUne.length > 0 && (
+              <div class="grid content-start gap-3">
+                {vuesUne.map((vue, index) => (
+                  <Packshot
+                    src={vue}
+                    alt={`${aLaUne.nom}, détail ${index + 1} du décor peint`}
+                    detail={true}
+                    tailles="(min-width: 1024px) 20vw, 31vw"
+                  />
+                ))}
+              </div>
+            )
+          }
         </div>
 
-        <div class="grid grid-cols-2 gap-4 sm:gap-6">
-          <Photo
-            src="/products/atelier-mains"
-            alt="Mains d’une céramiste posant un motif au pinceau fin sur un bol encore cru"
-            legende="Le geste"
-            ratio="3 / 4"
-            class="mt-8"
-            tailles="(min-width: 1024px) 24vw, 44vw"
-          />
-          <Photo
-            src="/products/atelier-sechage"
-            alt="Pièces en cours de séchage alignées sur une planche de bois à l’atelier"
-            legende="Le séchage"
-            ratio="3 / 4"
-            tailles="(min-width: 1024px) 24vw, 44vw"
-          />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ------------------------------ Valeurs ------------------------------ -->
-  <section id="valeurs" class="bg-lin">
-    <div class="mx-auto max-w-[1240px] px-5 pb-16 sm:px-8 sm:pb-20">
-      <h2 class="max-w-xl text-3xl leading-tight sm:text-4xl">
-        Ce que nous <em class="italic text-argile">garantissons</em>, pièce par pièce.
-      </h2>
-      <ul class="filet mt-10 grid gap-px border-filet bg-filet sm:grid-cols-2 lg:grid-cols-4">
-        {
-          valeurs.map((valeur, index) => (
-            <li class="bg-lin p-6 sm:p-7">
-              <span class="surtitre">0{index + 1}</span>
-              <h3 class="mt-3 font-display text-xl text-ardoise">{valeur.titre}</h3>
-              <p class="mt-2 text-sm leading-relaxed text-mastic">{valeur.texte}</p>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-  </section>
-
-  <!-- ------------------------- Grille de produits ------------------------ -->
-  <section id="creations" class="filet bg-lin">
-    <div class="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 sm:py-24">
-      <div class="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-        <h2 class="max-w-lg text-4xl leading-[1.06] sm:text-5xl">
-          Nos plus <em class="italic text-argile">belles créations</em>
-        </h2>
-        <p class="max-w-sm text-sm leading-relaxed text-mastic">
-          Un extrait du catalogue : {products.length} pièces réparties entre mugs, bols, tajines,
-          plateaux à pâtisseries, qraba, zellige et art mural.
-        </p>
-      </div>
-
-      <ul class="mt-12 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
-        {
-          grille.map((produit) => (
-            <li>
-              <ProductCard produit={produit} />
-            </li>
-          ))
-        }
-      </ul>
-
-      <div class="mt-14 flex justify-center">
-        <a href="/collection" class="btn btn-ligne">Toute la collection</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- -------------------------------- CTA -------------------------------- *
-       Le vert est celui de la nature morte : les deux bandes sombres du site
-       partagent la couleur du décor photographié.
-  ------------------------------------------------------------------------ -->
-  <section class="bg-vert-atelier text-blanc">
-    <div class="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 sm:py-20">
-      <div class="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
         <div>
-          <p class="surtitre text-blanc/85">Première main sur les nouveautés</p>
-          <h2 class="mt-5 max-w-xl text-4xl leading-[1.06] sm:text-5xl">
-            Les pièces partent <em class="italic">avant</em> d’arriver en ligne.
-          </h2>
-          <p class="mt-5 max-w-md text-base leading-relaxed text-blanc/90">
-            Une fournée, c’est vingt à trente pièces. Nous prévenons d’abord celles et ceux qui sont
-            inscrits : photos de la sortie de four, nom de l’artisan, et deux jours pour réserver
-            avant la mise en ligne.
+          <p class="surtitre">Pièce à la une</p>
+          <h2 id="titre-une" class="mt-4 text-4xl sm:text-5xl">{aLaUne.nom}</h2>
+          <p class="mt-4 text-lg text-ardoise">{aLaUne.prix}</p>
+          <p class="mt-6 max-w-md leading-relaxed text-mastic">{aLaUne.description}</p>
+          <p class="mt-5 text-sm text-mastic">
+            Peinte par <span class="text-ardoise">{artisanUne.nom}</span> — {aLaUne.ville},
+            {' '}{artisanUne.region}
+            <span aria-hidden="true"> · </span>
+            {aLaUne.commerce.disponibilite === 'unique' ? 'Pièce unique' : 'Refaite à la demande'}
           </p>
-
-          <form
-            class="mt-8 flex max-w-md flex-col gap-3 sm:flex-row"
-            method="post"
-            action="#"
-            aria-describedby="newsletter-aide"
-          >
-            <div class="flex-1">
-              <label for="email" class="surtitre text-blanc/85">Votre e-mail</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autocomplete="email"
-                placeholder="prenom@exemple.fr"
-                class="mt-2 min-h-11 w-full rounded-xs border border-blanc/50 bg-blanc px-3 text-ardoise placeholder:text-mastic"
-              />
-            </div>
-            <button type="submit" class="btn btn-clair mt-2 sm:mt-[1.85rem]">M’inscrire</button>
-          </form>
-          <p id="newsletter-aide" class="mt-3 text-xs text-blanc/85">
-            Environ un message par fournée. Désinscription en un clic. Formulaire de démonstration :
-            à brancher sur l’outil d’e-mailing avant mise en ligne.
-          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            {
+              aLaUne.reservee ? (
+                <span class="btn btn-primaire" aria-disabled="true">
+                  Pièce réservée
+                </span>
+              ) : (
+                <a href={`mailto:${brand.contact.email}?subject=${sujetReservation}`} class="btn btn-primaire">
+                  Réserver cette pièce
+                </a>
+              )
+            }
+            <a href={`/produits/${aLaUne.id}`} class="btn btn-contour">Voir la pièce</a>
+          </div>
         </div>
-
-        <Photo
-          src="/products/sortie-de-four"
-          alt="Pièces encore tièdes alignées à la sortie du four, avant emballage"
-          legende="Sortie de four"
-          ratio="4 / 3"
-          variante="sombre"
-          tailles="(min-width: 1024px) 38vw, 90vw"
-        />
       </div>
     </div>
   </section>
 
-  <!-- ---------------------------- Témoignages ---------------------------- -->
-  <section id="temoignages" class="bg-lin">
-    <div class="mx-auto max-w-[1240px] px-5 py-14 sm:px-8 sm:py-16">
-      <div class="max-w-2xl">
-        <p class="surtitre">Témoignages</p>
-        <h2 class="mt-4 text-3xl leading-tight sm:text-4xl">
-          Cette page attend <em class="italic text-argile">vos mots</em>.
-        </h2>
-        <p class="mt-4 text-base leading-relaxed text-mastic">
-          Nous n’inventons pas d’avis. Les premiers retours de clientes et de clients seront publiés
-          ici tels qu’ils nous parviendront, avec leur prénom et leur ville — et, quand la pièce s’y
-          prête, une photo prise chez eux.
+  <!-- ---------------- Rangées par collection + réassurance --------------- -->
+  {
+    rangees.map((r, index) => (
+      <>
+        <div class="conteneur">
+          <p class="reassurance">{reassurances[index]}</p>
+        </div>
+        <section class="section" aria-labelledby={`rangee-${index}`}>
+          <div class="conteneur">
+            <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+              <div>
+                <h2 id={`rangee-${index}`} class="text-3xl sm:text-4xl">
+                  {r.titre}
+                </h2>
+                <p class="mt-2 max-w-lg text-sm leading-relaxed text-mastic">{r.sousTitre}</p>
+              </div>
+              <a href={r.href} class="lien-fleche">
+                Tout afficher
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+            <ul class="mt-10 grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 lg:grid-cols-4">
+              {r.pieces.map((produit) => (
+                <li>
+                  <ProductCard produit={produit} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      </>
+    ))
+  }
+
+  <div class="conteneur">
+    <p class="reassurance">{reassurances[rangees.length] ?? reassurances[reassurances.length - 1]}</p>
+  </div>
+
+  <!-- ------------------------------ Atelier ----------------------------- -->
+  <section id="atelier" class="section scroll-mt-20" aria-labelledby="titre-atelier">
+    <div class="conteneur">
+      <div class="grid items-center gap-12 md:grid-cols-[0.8fr_1fr] lg:gap-24">
+        <Photo
+          src="/products/atelier-ambiance"
+          alt="Feuille d’anthurium, vase de terre et qraba calligraphiée sur une table drapée de vert"
+          ratio="3 / 4"
+          arche={true}
+          tailles="(min-width: 768px) 38vw, 90vw"
+          class="mx-auto w-full max-w-md"
+        />
+        <div>
+          <p class="surtitre">L’atelier</p>
+          <h2 id="titre-atelier" class="mt-4 max-w-md text-4xl sm:text-5xl">
+            Des mains, des villes, <em class="italic text-argile">une signature.</em>
+          </h2>
+          <p class="mt-6 max-w-md leading-relaxed text-mastic">
+            Chaque pièce est tournée ou peinte par un atelier que nous connaissons, d’Alger à la
+            Kabylie. Personne n’y reproduit un modèle : deux pièces d’une même série ne sont jamais
+            jumelles.
+          </p>
+          <dl class="filet mt-10 grid grid-cols-3 gap-4 pt-8">
+            {
+              chiffres.map((chiffre) => (
+                <div>
+                  <dt class="sr-only">{chiffre.libelle}</dt>
+                  <dd>
+                    <span class="block font-display text-4xl text-ardoise sm:text-5xl">{chiffre.valeur}</span>
+                    <span class="mt-2 block text-xs uppercase tracking-[0.14em] text-mastic" aria-hidden="true">
+                      {chiffre.libelle}
+                    </span>
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ----------------------------- Newsletter --------------------------- -->
+  <section class="section bg-vert-atelier text-lin" aria-labelledby="titre-lettre">
+    <div class="conteneur">
+      <div class="mx-auto max-w-xl text-center">
+        <p class="surtitre text-lin/80">Lettre</p>
+        <h2 id="titre-lettre" class="mt-4 text-3xl sm:text-4xl">Réassorts et nouveautés</h2>
+        <p class="mt-4 leading-relaxed text-lin/85">
+          Un message à chaque sortie de four, avec les pièces disponibles avant leur mise en ligne.
         </p>
-        <a href={`mailto:${brand.contact.email}`} class="btn btn-ligne mt-7">
-          Nous raconter votre pièce
-        </a>
+        <form class="mt-8 flex flex-col gap-3 sm:flex-row" method="post" action="#">
+          <label for="email-lettre" class="sr-only">Votre adresse e-mail</label>
+          <input
+            id="email-lettre"
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+            placeholder="Votre adresse e-mail"
+            class="champ flex-1 border-transparent"
+          />
+          <button type="submit" class="btn btn-primaire">S’inscrire</button>
+        </form>
+        <p class="mt-3 text-xs text-lin/75">Désinscription en un clic. Formulaire à brancher sur l’outil d’e-mailing.</p>
       </div>
     </div>
   </section>

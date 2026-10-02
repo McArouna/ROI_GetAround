@@ -1,0 +1,26 @@
+---
+import ListePieces from '../../components/ListePieces.astro';
+import {
+  collectionsAffichables,
+  piecesDeLaCollection,
+  piecesDuType,
+  typesAffichables,
+} from '../../lib/catalogue';
+
+export function getStaticPaths() {
+  return [
+    ...collectionsAffichables.map((c) => ({
+      params: { slug: c.id },
+      props: { titre: c.nom, intro: c.intro, pieces: piecesDeLaCollection(c.id) },
+    })),
+    ...typesAffichables.map((t) => ({
+      params: { slug: t.id },
+      props: { titre: t.nom, intro: t.intro, pieces: piecesDuType(t.id) },
+    })),
+  ];
+}
+
+const { titre, intro, pieces } = Astro.props;
+---
+
+<ListePieces titre={titre} intro={intro} pieces={pieces} actif={Astro.params.slug} />
