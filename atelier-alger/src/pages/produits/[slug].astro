@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
-import Visuel from '../../components/Visuel.astro';
+import Packshot from '../../components/Packshot.astro';
+import Photo from '../../components/Photo.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import { brand } from '../../data/brand';
 import { getArtisan } from '../../data/artisans';
@@ -40,7 +41,7 @@ const sujetReservation = encodeURIComponent(`Réservation — ${produit.nom} (${
 ---
 
 <Base titre={produit.nom} description={produit.description}>
-  <div class="bg-blanc">
+  <div class="bg-lin">
     <div class="mx-auto max-w-[1240px] px-5 sm:px-8">
       <!-- Fil d’Ariane -->
       <nav aria-label="Fil d’Ariane" class="py-5 text-sm text-mastic">
@@ -60,25 +61,23 @@ const sujetReservation = encodeURIComponent(`Réservation — ${produit.nom} (${
       <!-- Galerie + achat -->
       <div class="filet grid gap-10 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-14">
         <div>
-          <Visuel
+          <Packshot
             src={produit.image}
             alt={`${produit.nom}, vue principale`}
             legende={produit.nom}
-            ratio="4 / 5"
-            ton="profond"
             priorite={true}
+            tailles="(min-width: 1024px) 48vw, 92vw"
           />
           {
             produit.galerie.length > 0 && (
               <ul class="mt-4 grid grid-cols-2 gap-4">
                 {produit.galerie.map((vue, index) => (
                   <li>
-                    <Visuel
+                    <Packshot
                       src={vue}
                       alt={`${produit.nom}, vue ${index + 2}`}
                       legende={`Vue ${index + 2}`}
-                      ratio="1 / 1"
-                      ton={index % 2 === 0 ? 'lin' : 'profond'}
+                      tailles="(min-width: 1024px) 24vw, 45vw"
                     />
                   </li>
                 ))}
@@ -149,16 +148,16 @@ const sujetReservation = encodeURIComponent(`Réservation — ${produit.nom} (${
   </div>
 
   <!-- ----------------------------- L’artisan ----------------------------- -->
-  <section class="bg-lin">
+  <section class="filet bg-lin">
     <div class="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 sm:py-20">
       <div class="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
-        <Visuel
+        <Photo
           src={artisan.portrait}
           alt={`Portrait de ${artisan.nom}, ${artisan.metier.toLowerCase()} à ${artisan.ville}`}
           legende={artisan.nom}
           ratio="3 / 4"
-          ton="blanc"
           class="max-w-sm"
+          tailles="(min-width: 1024px) 26vw, 90vw"
         />
         <div>
           <p class="surtitre">L’artisan</p>
@@ -181,15 +180,18 @@ const sujetReservation = encodeURIComponent(`Réservation — ${produit.nom} (${
   <!-- ----------------------------- À voir aussi -------------------------- -->
   {
     aVoirAussi.length > 0 && (
-      <section class="bg-blanc">
+      <section class="filet bg-lin">
         <div class="mx-auto max-w-[1240px] px-5 py-16 sm:px-8 sm:py-20">
           <h2 class="text-3xl leading-tight sm:text-4xl">
             De la <em class="italic text-argile">même main</em>, ou de la même famille
           </h2>
           <ul class="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-            {aVoirAussi.map((autre, index) => (
+            {aVoirAussi.map((autre) => (
               <li>
-                <ProductCard produit={autre} ton={index % 2 === 0 ? 'lin' : 'profond'} />
+                <ProductCard
+                  produit={autre}
+                  tailles="(min-width: 1024px) 31vw, (min-width: 640px) 44vw, 90vw"
+                />
               </li>
             ))}
           </ul>

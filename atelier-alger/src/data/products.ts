@@ -28,8 +28,11 @@ export interface Product {
   descriptionLongue: string;
   /** Placeholder tant que la grille tarifaire n’est pas arrêtée. */
   prix: string;
-  /** Chemin dans /public/products/. La photo peut ne pas encore exister :
-   *  le composant Placeholder prend alors le relais, au bon format. */
+  /**
+   * Chemin de base dans /public/products/, SANS extension : le pipeline
+   * d'images produit `<base>.webp`, `<base>@2x.webp` et les replis PNG.
+   * Tant que rien n'est livré, le cadre affiche un repère au même format.
+   */
   image: string;
   /** Vues supplémentaires de la galerie produit. */
   galerie: string[];
@@ -76,8 +79,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le signe est tracé d’un seul geste, sans repentir possible : l’émail boit l’oxyde immédiatement. C’est ce qui explique que deux tasses Tanit ne se ressemblent jamais tout à fait — l’une a le bras plus haut, l’autre le trait plus épais. Le turquoise est un trempage : la tasse est plongée à l’envers, tenue par le pied, et la ligne s’arrête où la main a arrêté le geste — jamais tout à fait droite. L’anse, large et ronde, est montée à part puis lissée à l’éponge humide.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/tasse-tanit.jpg',
-    galerie: ['/products/hero-nature-morte.jpg', '/products/tasse-tanit-2.jpg'],
+    image: '/products/tasse-tanit',
+    galerie: ['/products/tasse-tanit-2', '/products/tasse-tanit-3'],
     vedette: true,
     tracabilite: {
       argile: 'Terre blanche chamottée, [carrière à préciser]',
@@ -100,8 +103,8 @@ export const products: Product[] = [
     descriptionLongue:
       'La calligraphie fait le tour complet du mug : impossible de la lire d’un coup d’œil, il faut faire tourner la pièce entre ses doigts. Le trait est posé au pinceau biseauté, plein et délié, sur un fond crème légèrement nuageux — l’émail n’est pas pulvérisé mais versé, il laisse des variations.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/mug-sabah-el-kheir.jpg',
-    galerie: ['/products/mug-sabah-el-kheir-2.jpg'],
+    image: '/products/mug-sabah-el-kheir',
+    galerie: ['/products/mug-sabah-el-kheir-2'],
     vedette: true,
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
@@ -124,8 +127,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le décor n’est pas sur la paroi mais au fond, comme un mot qu’on laisse à celui qui finit sa tasse. Bleu de cobalt sur blanc, cerné d’un filet fin. L’extérieur reste nu, à peine satiné, pour qu’on sente la terre sous les doigts.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/tasse-khamsa.jpg',
-    galerie: ['/products/tasse-khamsa-2.jpg'],
+    image: '/products/tasse-khamsa',
+    galerie: ['/products/tasse-khamsa-2'],
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
       technique: 'Tournage, décor cobalt sous émail',
@@ -148,8 +151,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le dégradé n’est pas imprimé : l’engobe est appliqué en plusieurs passes, de plus en plus diluées, de sorte que la couleur s’efface vers le haut. Les chevrons sont ceux des poteries de Kabylie, tracés au peigne de bois avant la première cuisson.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/bol-ocre-du-hoggar.jpg',
-    galerie: ['/products/bol-ocre-du-hoggar-2.jpg', '/products/bol-ocre-du-hoggar-3.jpg'],
+    image: '/products/bol-ocre-du-hoggar',
+    galerie: ['/products/bol-ocre-du-hoggar-2', '/products/bol-ocre-du-hoggar-3'],
     vedette: true,
     tracabilite: {
       argile: 'Terre rouge locale, [carrière à préciser]',
@@ -171,8 +174,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Les quatre bols sont tournés au même gabarit pour s’emboîter, mais chacun reçoit un signe distinct — losange, peigne, chevron, point d’eau — tiré du répertoire des peintures rupestres du Tassili. Empilés, ils forment une colonne qu’on laisse sur le plan de travail.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/coffret-bols-tassili.jpg',
-    galerie: ['/products/coffret-bols-tassili-2.jpg', '/products/coffret-bols-tassili-3.jpg'],
+    image: '/products/coffret-bols-tassili',
+    galerie: ['/products/coffret-bols-tassili-2', '/products/coffret-bols-tassili-3'],
     tracabilite: {
       argile: 'Terre rouge locale, [carrière à préciser]',
       technique: 'Colombin, décor aux oxydes, coffret bois [essence à préciser]',
@@ -192,8 +195,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le contraste est volontaire : dehors une couleur douce, presque poudrée, dedans un graphisme net qui se découvre au fur et à mesure qu’on vide le bol. Le pied est laissé brut, non émaillé, pour qu’on voie la terre.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/bol-peche-et-signes.jpg',
-    galerie: ['/products/bol-peche-et-signes-2.jpg'],
+    image: '/products/bol-peche-et-signes',
+    galerie: ['/products/bol-peche-et-signes-2'],
     tracabilite: {
       argile: 'Grès chamotté, [carrière à préciser]',
       technique: 'Tournage, émail mat, décor pinceau',
@@ -216,10 +219,10 @@ export const products: Product[] = [
     descriptionLongue:
       'Le bouquet part de la pointe du couvercle et descend en spirale jusqu’au bord : il faut tourner la pièce pendant qu’on peint, ce que [Sofiane] fait sur une girelle de bois. Les couleurs sont posées à plat, puis cernées d’un trait brun qui les tient. Pièce décorative : elle se pose au centre de la table, garnie de dattes ou de gâteaux.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/tajine-fleurs-de-nedroma.jpg',
+    image: '/products/tajine-fleurs-de-nedroma',
     galerie: [
-      '/products/tajine-fleurs-de-nedroma-2.jpg',
-      '/products/tajine-fleurs-de-nedroma-3.jpg',
+      '/products/tajine-fleurs-de-nedroma-2',
+      '/products/tajine-fleurs-de-nedroma-3',
     ],
     vedette: true,
     tracabilite: {
@@ -242,8 +245,8 @@ export const products: Product[] = [
     descriptionLongue:
       'L’or est un lustre, appliqué après l’émail et refixé à basse température : c’est la troisième fois que la pièce entre au four, et la plus risquée. Une coulure, un doigt posé au mauvais endroit, et la pièce est écartée. Ce qui arrive à la table a donc passé trois fois l’épreuve du feu.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/tajine-dhahab.jpg',
-    galerie: ['/products/tajine-dhahab-2.jpg'],
+    image: '/products/tajine-dhahab',
+    galerie: ['/products/tajine-dhahab-2'],
     tracabilite: {
       argile: 'Terre de [Nedroma], tamisée à l’atelier',
       technique: 'Tournage, émail ivoire, lustre or au pinceau',
@@ -265,8 +268,8 @@ export const products: Product[] = [
     descriptionLongue:
       'L’étoile est construite au compas sur la terre crue, puis peinte à main levée : les branches ne sont pas parfaitement égales et c’est ce qui la sauve de l’effet industriel. Le bord est passé d’un seul mouvement, l’assiette tournant sous le pinceau.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/assiette-etoile-de-bejaia.jpg',
-    galerie: ['/products/assiette-etoile-de-bejaia-2.jpg'],
+    image: '/products/assiette-etoile-de-bejaia',
+    galerie: ['/products/assiette-etoile-de-bejaia-2'],
     vedette: true,
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
@@ -287,8 +290,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le centre est laissé vide pour la nourriture — un plat de service n’a pas besoin d’être chargé là où on pose le couscous. Tout le décor se concentre sur le bord : un aplat safran, puis des traits noirs tirés d’un coup de poignet, irréguliers de façon assumée.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/plat-bord-safran.jpg',
-    galerie: ['/products/plat-bord-safran-2.jpg'],
+    image: '/products/plat-bord-safran',
+    galerie: ['/products/plat-bord-safran-2'],
     tracabilite: {
       argile: 'Terre de [Nedroma], tamisée à l’atelier',
       technique: 'Calibrage, aplat et traits au pinceau',
@@ -312,8 +315,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Chaque losange est peint séparément, dans l’ordre où on les range vraiment sur un plateau de fête : rangs serrés, décalés d’un demi-pas. L’amande centrale reçoit un point de lustre doré. De loin on croit voir des gâteaux ; de près, on voit le pinceau. C’est exactement l’effet recherché.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/plateau-baklawa.jpg',
-    galerie: ['/products/plateau-baklawa-2.jpg', '/products/plateau-baklawa-3.jpg'],
+    image: '/products/plateau-baklawa',
+    galerie: ['/products/plateau-baklawa-2', '/products/plateau-baklawa-3'],
     vedette: true,
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
@@ -335,8 +338,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le plateau est partagé en deux comme le sont les vrais plateaux de l’Aïd, quand on refuse de choisir. À gauche les makrouts en rangs serrés, semoule et datte ; à droite les griwech enroulés, luisants de miel, peints par touches transparentes superposées pour rendre le brillant sans lustre.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/plateau-makrout-griwech.jpg',
-    galerie: ['/products/plateau-makrout-griwech-2.jpg'],
+    image: '/products/plateau-makrout-griwech',
+    galerie: ['/products/plateau-makrout-griwech-2'],
     vedette: true,
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
@@ -358,8 +361,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Les bourek sont disposés en éventail, comme on les dresse à la sortie de la friture, et la faïence garde son blanc entre eux pour donner de l’air au dessin. Un filet brun cerne le bord, sans plus : le sujet est déjà chargé.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/plateau-bourek-du-vendredi.jpg',
-    galerie: ['/products/plateau-bourek-du-vendredi-2.jpg'],
+    image: '/products/plateau-bourek-du-vendredi',
+    galerie: ['/products/plateau-bourek-du-vendredi-2'],
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
       technique: 'Calibrage, illustration au pinceau fin',
@@ -383,8 +386,8 @@ export const products: Product[] = [
     descriptionLongue:
       'La forme vient des gourdes qu’on emportait aux champs : panse plate, col court, petite anse percée. [Yasmine] y peint une ruelle réelle, du sol vers le haut — le calepinage des pavés d’abord, puis les femmes en haïk, puis les arcades et le linge de lumière au fond. Le col reçoit une frise bleue en chevrons, seule géométrie d’une pièce qui, pour le reste, est une scène. Le blanc du fond n’est pas peint : c’est l’émail laissé nu.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/qraba-casbah.jpg',
-    galerie: ['/products/qraba-casbah-2.jpg', '/products/qraba-casbah-3.jpg'],
+    image: '/products/qraba-casbah',
+    galerie: ['/products/qraba-casbah-2', '/products/qraba-casbah-3'],
     vedette: true,
     tracabilite: {
       argile: 'Terre rouge, [carrière à préciser]',
@@ -407,8 +410,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Ce n’est pas une phrase : ce sont des lettres, posées les unes sur les autres jusqu’à saturer la surface, comme les calligraphes le font sur leurs planches d’entraînement. On y reconnaît des alifs, des sâds, des points — mais rien à lire. La couleur est une seule terre brune, diluée plus ou moins selon la largeur du trait. Le liège est taillé à la main, pièce par pièce, car aucun col n’a tout à fait le même diamètre.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/qraba-el-khat.jpg',
-    galerie: ['/products/hero-nature-morte.jpg', '/products/qraba-el-khat-2.jpg'],
+    image: '/products/qraba-el-khat',
+    galerie: ['/products/qraba-el-khat-2', '/products/qraba-el-khat-3'],
     vedette: true,
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
@@ -431,8 +434,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Chaque fleur part du cœur : un point grenat, puis les pétales tirés vers l’extérieur d’un coup de pinceau qui s’allège en finissant. Les feuilles sont posées entre elles, en épis, pour combler le blanc sans jamais le fermer tout à fait. [Sofiane] en peint une vingtaine par face et ne les compte pas : il s’arrête quand la panse est pleine.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/qraba-zahra.jpg',
-    galerie: ['/products/qraba-zahra-2.jpg'],
+    image: '/products/qraba-zahra',
+    galerie: ['/products/qraba-zahra-2'],
     vedette: true,
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
@@ -454,8 +457,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le haïk est obtenu en réserve : l’émail blanc reste nu, c’est le fond sombre peint autour qui dessine la silhouette. Il n’y a donc aucun trait blanc — seulement du vide correctement placé, ce qui est bien plus difficile.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/gourde-haik.jpg',
-    galerie: ['/products/gourde-haik-2.jpg'],
+    image: '/products/gourde-haik',
+    galerie: ['/products/gourde-haik-2'],
     tracabilite: {
       argile: 'Terre rouge, [carrière à préciser]',
       technique: 'Tournage, décor en réserve',
@@ -475,8 +478,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Ici, l’émail fait tout le travail. Versé sur la pièce tenue par le col, il descend seul et s’accumule au ras du pied, où il vire au bleu presque noir. Deux gourdes trempées le même jour ne coulent jamais pareil.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/qraba-emaillee-bleu-alger.jpg',
-    galerie: ['/products/qraba-emaillee-bleu-alger-2.jpg'],
+    image: '/products/qraba-emaillee-bleu-alger',
+    galerie: ['/products/qraba-emaillee-bleu-alger-2'],
     tracabilite: {
       argile: 'Grès chamotté, [carrière à préciser]',
       technique: 'Tournage, émail versé',
@@ -498,8 +501,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Les rayures sont posées sur le tour, pinceau tenu immobile pendant que la pièce défile : la largeur varie avec la vitesse, ce qui donne ces bandes qui respirent. Le bec est tiré au pouce, à main levée, dernier geste avant le séchage.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/pichet-rayures-de-ghardaia.jpg',
-    galerie: ['/products/pichet-rayures-de-ghardaia-2.jpg'],
+    image: '/products/pichet-rayures-de-ghardaia',
+    galerie: ['/products/pichet-rayures-de-ghardaia-2'],
     vedette: true,
     tracabilite: {
       argile: 'Grès chamotté, [carrière à préciser]',
@@ -520,8 +523,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Une seule ligne : l’émail s’arrête net à mi-corps, la terre reste apparente sur deux centimètres, puis l’émail reprend. La ligne est tracée à la cire avant trempage — une fois posée, on ne revient pas dessus.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/carafe-ligne-blanche.jpg',
-    galerie: ['/products/carafe-ligne-blanche-2.jpg'],
+    image: '/products/carafe-ligne-blanche',
+    galerie: ['/products/carafe-ligne-blanche-2'],
     tracabilite: {
       argile: 'Grès blanc, [fournisseur à préciser]',
       technique: 'Tournage, réserve à la cire',
@@ -544,8 +547,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Découpé à la main puis émaillé un par un, le carreau garde des bords légèrement irréguliers et une épaisseur qui varie de quelques dixièmes. Posés côte à côte, ces écarts accrochent la lumière : c’est ce qui distingue un zellige d’un carrelage.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/carreau-zellige-etoile.jpg',
-    galerie: ['/products/carreau-zellige-etoile-2.jpg'],
+    image: '/products/carreau-zellige-etoile',
+    galerie: ['/products/carreau-zellige-etoile-2'],
     tracabilite: {
       argile: 'Terre rouge, [carrière à préciser]',
       technique: 'Découpe à la main, émaillage pièce à pièce',
@@ -566,8 +569,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le plateau céramique est serti dans un cadre de bois qui sert de préhension et protège les arêtes. On y pose le pain, les olives, le fromage — et on la repose telle quelle sur la table, sans dressage.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/planche-zellige.jpg',
-    galerie: ['/products/planche-zellige-2.jpg'],
+    image: '/products/planche-zellige',
+    galerie: ['/products/planche-zellige-2'],
     tracabilite: {
       argile: 'Terre rouge, [carrière à préciser]',
       technique: 'Carreaux assemblés, cadre bois [essence à préciser]',
@@ -590,8 +593,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Découpée à la mirette dans une plaque d’argile, la main garde l’épaisseur du rouleau et les traces de la découpe sur la tranche. Le trou de suspension est percé avant cuisson, jamais après — une céramique cuite ne se perce plus.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/main-de-fatma-murale.jpg',
-    galerie: ['/products/main-de-fatma-murale-2.jpg'],
+    image: '/products/main-de-fatma-murale',
+    galerie: ['/products/main-de-fatma-murale-2'],
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
       technique: 'Plaque, découpe à la mirette, décor cobalt',
@@ -611,8 +614,8 @@ export const products: Product[] = [
     descriptionLongue:
       'La paume est creusée au pouce pour retenir le jus de la cuillère, et l’émail ne couvre que ce creux — le reste est laissé mat pour ne pas glisser sur le plan de travail. C’est le premier objet que beaucoup d’entre nous ont offert.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/repose-cuillere-khamsa.jpg',
-    galerie: ['/products/repose-cuillere-khamsa-2.jpg'],
+    image: '/products/repose-cuillere-khamsa',
+    galerie: ['/products/repose-cuillere-khamsa-2'],
     tracabilite: {
       argile: 'Grès chamotté, [carrière à préciser]',
       technique: 'Plaque estampée, émail partiel',
@@ -636,8 +639,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le savon est coulé à froid puis mis à sécher six semaines sur claies — c’est ce temps-là qui le rend dur et durable. La boîte métal, illustrée d’un motif de zellige et d’une branche de néroli, se garde bien après : couture, épices, petites choses.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/savon-fleur-oranger.jpg',
-    galerie: ['/products/savon-fleur-oranger-2.jpg'],
+    image: '/products/savon-fleur-oranger',
+    galerie: ['/products/savon-fleur-oranger-2'],
     tracabilite: {
       argile: 'Sans céramique — huiles végétales [composition à préciser]',
       technique: 'Saponification à froid, boîte métal illustrée',
@@ -657,8 +660,8 @@ export const products: Product[] = [
     descriptionLongue:
       'L’huile de pépins de figue de barbarie entre en fin de cuisson pour ne pas être dénaturée. La boîte reprend le motif des haies de cactus qui bordent les chemins — raquettes serrées, fruits ronds, épines à l’encre fine.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/savon-figue-de-barbarie.jpg',
-    galerie: ['/products/savon-figue-de-barbarie-2.jpg'],
+    image: '/products/savon-figue-de-barbarie',
+    galerie: ['/products/savon-figue-de-barbarie-2'],
     tracabilite: {
       argile: 'Sans céramique — huiles végétales [composition à préciser]',
       technique: 'Saponification à froid, boîte métal illustrée',
@@ -682,8 +685,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le def est monté par un facteur d’instruments, puis peint à plat, peau tendue. Le motif central est posé en premier, le cercle de signes ensuite, à distance régulière contrôlée à l’œil. Il reste jouable, même si la plupart finissent au mur.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/def-peint.jpg',
-    galerie: ['/products/def-peint-2.jpg'],
+    image: '/products/def-peint',
+    galerie: ['/products/def-peint-2'],
     vedette: true,
     tracabilite: {
       argile: 'Sans céramique — bois et peau [origine à préciser]',
@@ -704,8 +707,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Quatre portes réelles, relevées dans la haute Casbah et repeintes carreau par carreau : le heurtoir en main de Fatma, les clous en quinconce, le bleu passé par le soleil. Le cadre est laissé brut pour ne pas concurrencer la couleur.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/cadre-portes-de-la-casbah.jpg',
-    galerie: ['/products/cadre-portes-de-la-casbah-2.jpg'],
+    image: '/products/cadre-portes-de-la-casbah',
+    galerie: ['/products/cadre-portes-de-la-casbah-2'],
     tracabilite: {
       argile: 'Faïence blanche, [fournisseur à préciser]',
       technique: 'Carreaux peints à la main, cadre bois [essence à préciser]',
@@ -727,8 +730,8 @@ export const products: Product[] = [
     descriptionLongue:
       'Le dessin original est peint à la gouache, puis numérisé et imprimé en tirage limité sur papier de coton. C’est la seule pièce reproductible du catalogue — et elle est numérotée à la main, une par une.',
     prix: PRIX_PLACEHOLDER,
-    image: '/products/affiche-alger-la-blanche.jpg',
-    galerie: ['/products/affiche-alger-la-blanche-2.jpg'],
+    image: '/products/affiche-alger-la-blanche',
+    galerie: ['/products/affiche-alger-la-blanche-2'],
     tracabilite: {
       argile: 'Sans céramique — papier coton [300 g]',
       technique: 'Gouache originale, impression pigmentaire, numérotée à la main',

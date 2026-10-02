@@ -2,19 +2,19 @@
 
 /* ------------------------------------------------------------------ *
  * Jetons de design — direction artistique.
- * Tout changement de palette ou de typo se fait ICI.
+ * Tout changement de palette, de typo ou d'ombre se fait ICI.
  * ------------------------------------------------------------------ */
 @theme {
   /* Palette */
-  --color-lin: #f5efe6;
-  --color-lin-profond: #ede4d7;
-  --color-ardoise: #2b2622;
+  --color-lin: #f5f0e8; /* le crème des sections produit */
+  --color-ardoise: #2b2622; /* texte, et fond charbon des bandes sombres */
   --color-argile: #8b4530;
   --color-argile-clair: #a9583f;
   --color-teal: #4f7c77; /* contraste 4,69:1 sur blanc — AA texte normal */
-  --color-teal-profond: #3c625e; /* pour le texte fin sur fond clair */
+  --color-teal-profond: #3c625e; /* texte fin sur fond clair */
+  --color-vert-atelier: #023833; /* vert de la nature morte : bandes sombres */
   --color-filet: #ddd2c1;
-  --color-mastic: #6b5f55; /* légendes — 5,4:1 sur lin, AA */
+  --color-mastic: #6b5f55; /* légendes — 5,4:1 sur crème, AA */
   --color-blanc: #ffffff;
 
   /* Typographie */
@@ -26,6 +26,11 @@
   --radius-xs: 2px;
   --radius-sm: 3px;
   --radius-md: 4px;
+
+  /* Ombres produit : UNE seule direction de lumière (verticale, du haut),
+     donc une seule géométrie d'ombre. Seule l'opacité s'adapte au fond. */
+  --ombre-sombre: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45));
+  --ombre-claire: drop-shadow(0 12px 24px rgba(43, 38, 34, 0.2));
 }
 
 @layer base {
@@ -78,7 +83,7 @@
 }
 
 @layer components {
-  /* Filet horizontal fin, utilisé comme séparateur éditorial. */
+  /* Filet horizontal fin, séparateur éditorial. */
   .filet {
     border-top: 1px solid var(--color-filet);
   }
@@ -97,6 +102,9 @@
     font-family: var(--font-arabe);
     direction: rtl;
     unicode-bidi: isolate;
+    /* Le mot reste écrit de droite à gauche, mais il s'aligne sur le bord du
+       bloc de texte qui l'accueille : la mise en page du MVP est LTR. */
+    text-align: left;
     line-height: 1.9;
   }
 
@@ -126,6 +134,19 @@
     background-color: #73391f;
   }
 
+  /* Variante du bouton primaire sur fond sombre : l'argile de la charte ne
+     détache pas assez du charbon (2,1:1 pour la bordure du composant, sous le
+     seuil 3:1 de la règle 1.4.11), l'argile clair oui (3,1:1), avec un texte
+     blanc à 4,8:1. */
+  .btn-primaire-sombre {
+    background-color: var(--color-argile-clair);
+    color: var(--color-blanc);
+  }
+  .btn-primaire-sombre:hover {
+    background-color: var(--color-lin);
+    color: var(--color-ardoise);
+  }
+
   .btn-ligne {
     border: 1px solid var(--color-ardoise);
     color: var(--color-ardoise);
@@ -142,5 +163,163 @@
   .btn-clair:hover {
     background-color: var(--color-blanc);
     color: var(--color-ardoise);
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Packshot — le cadre produit, strictement identique partout.
+   *
+   * Pas de carte, pas de fond propre, pas de bord : le produit détouré est
+   * posé sur le fond de la section. La marge interne (15 % de part et
+   * d'autre) est cuite dans le fichier par le pipeline d'images, donc
+   * rigoureusement la même d'une pièce à l'autre.
+   * ---------------------------------------------------------------- */
+  .packshot {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-md);
+    /* Pas d'overflow caché : l'ombre portée doit pouvoir dépasser. */
+  }
+
+  .packshot picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .packshot__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  /* Une seule ombre, suivant le détourage (drop-shadow, pas box-shadow). */
+  .packshot--sombre .packshot__image {
+    filter: var(--ombre-sombre);
+  }
+  .packshot--creme .packshot__image {
+    filter: var(--ombre-claire);
+  }
+
+  .packshot--survol {
+    transition: transform 200ms ease;
+    will-change: transform;
+  }
+  a:hover .packshot--survol,
+  a:focus-visible .packshot--survol {
+    transform: translateY(-4px);
+  }
+
+  /* Repère d'attente : mêmes dimensions que le produit à venir. */
+  .packshot__attente,
+  .photo__attente {
+    position: absolute;
+    inset: 13%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid var(--color-filet);
+    border-radius: var(--radius-xs);
+    color: var(--color-mastic);
+  }
+
+  .photo__attente {
+    inset: 0;
+  }
+
+  .packshot--sombre .packshot__attente,
+  .photo--sombre .photo__attente {
+    border-color: rgb(245 240 232 / 0.28);
+    color: rgb(245 240 232 / 0.72);
+  }
+
+  .packshot__nom {
+    font-family: var(--font-display);
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    color: inherit;
+  }
+
+  .packshot__mention {
+    font-size: 0.625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Photo d'ambiance — cadrage photographique, sans ombre ajoutée.
+   * ---------------------------------------------------------------- */
+  .photo {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background-color: color-mix(in srgb, var(--color-lin) 70%, var(--color-filet));
+  }
+
+  .photo--sombre {
+    background-color: rgb(2 56 51 / 0.5);
+  }
+
+  /* Remplit son conteneur, sans arrondi : utilisé par le hero. */
+  .photo--plein {
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+    background-color: var(--color-vert-atelier);
+  }
+
+  .photo picture,
+  .photo__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Hero — la nature morte est fondue dans le fond de la section : elle est
+   * posée en pleine hauteur et son voile de dégradé la raccorde au charbon,
+   * pour qu'aucune arête de photo ne soit visible.
+   * ---------------------------------------------------------------- */
+  /* Cadrage de la nature morte : on privilégie le haut de la scène
+     (feuille + col de la qraba) quand le cadre s'élargit. */
+  .hero-photo .photo__image {
+    object-position: center 38%;
+  }
+
+  /* Mobile : la photo est en bas du hero ; le voile la raccorde au charbon
+     en haut comme en bas, pour qu'aucune arête de photo n'apparaisse. */
+  .hero-voile {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(
+        to bottom,
+        var(--color-ardoise) 0%,
+        rgb(43 38 34 / 0.55) 16%,
+        rgb(43 38 34 / 0) 46%
+      ),
+      linear-gradient(to top, var(--color-ardoise) 0%, rgb(43 38 34 / 0) 20%);
+  }
+
+  @media (min-width: 1024px) {
+    /* Bureau : la photo tient la moitié droite, le voile la raccorde à gauche
+       et en bas, sans arête visible. */
+    .hero-voile {
+      background:
+        linear-gradient(
+          to right,
+          var(--color-ardoise) 0%,
+          rgb(43 38 34 / 0.7) 14%,
+          rgb(43 38 34 / 0) 46%
+        ),
+        linear-gradient(to top, var(--color-ardoise) 0%, rgb(43 38 34 / 0) 26%);
+    }
   }
 }

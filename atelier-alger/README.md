@@ -11,7 +11,8 @@ structure produit est prête à accueillir Shopify ou Stripe sans refonte (voir
 - Astro 7 + Tailwind CSS 4 + TypeScript
 - Sortie 100 % statique (`dist/`), déployable sur Vercel, Netlify ou tout hébergeur de fichiers
 - 29 pièces réparties en 11 familles d’objets, dont 4 déjà photographiées
-- Aucune image tierce : chaque visuel est un **placeholder au format exact** de la photo à venir
+- **Système d’image unique** : packshots détourés, échelle normalisée, une seule ombre
+  (voir § 2)
 
 ---
 
@@ -29,7 +30,9 @@ npm run dev        # http://localhost:4321
 | `npm run build` | génère le site statique dans `dist/` |
 | `npm run preview` | prévisualise le contenu de `dist/` |
 | `npm run check` | vérification TypeScript / Astro (doit rester à 0 erreur) |
-| `npm run photos` | liste les photos encore manquantes dans `public/products/` |
+| `npm run detourer` | détoure les photos brutes (étape 1 du pipeline d’images) |
+| `npm run images` | normalise et exporte les visuels (étape 2) |
+| `npm run photos` | liste les visuels manquants ou en attente de traitement |
 
 ### Déploiement
 
@@ -41,87 +44,157 @@ Le dépôt contient aussi, à sa racine, un ancien outil sans rapport : **la rac
 
 ---
 
-## 2. Où déposer les photos
+## 2. Le système d’image
 
-Toutes les photos vont dans **`public/products/`** (les portraits d’artisans dans
-`public/products/artisans/`). Aucun code à modifier : tant que le fichier n’existe pas,
-le site affiche un placeholder **au bon ratio et à la bonne place** ; dès que le fichier
-est déposé au bon nom, la photo le remplace au build suivant.
+Toutes les images produit du site obéissent au même contrat. C’est ce qui fait tenir la
+grille : aucune vignette n’est traitée au cas par cas.
 
-La page d’accueil met **automatiquement en avant les pièces déjà photographiées** (vignettes du hero et grille « Nos plus belles créations »), via `photosDabord()` dans `src/lib/images.ts` : à mesure que les photos arrivent, la vitrine se remplit sans qu’on touche au code.
+| Règle | Mise en œuvre |
+| --- | --- |
+| **Fond transparent** | Les packshots sont des PNG/WebP détourés. Le fond visible est toujours celui de la section (crème `#F5F0E8` ou charbon `#2B2622`), jamais celui de la photo. |
+| **Échelle normalisée** | Chaque objet est ramené à la **même masse visuelle** : l’aire qu’occupe une pièce verticale haute de 70 % du cadre. Une qraba atterrit donc à 70 % de la hauteur, une tasse large à ~49 % — mais les deux occupent 35 % de l’aire du cadre. La marge interne est constante, cuite dans le fichier : aucun zoom CSS. |
+| **Cadres identiques** | Même `aspect-ratio: 1/1`, même `object-fit: contain`, même rayon (4 px), même ombre, partout — vignettes d’accueil, catalogue, page produit, pièces liées. |
+| **Une seule lumière** | Aucune ombre n’est cuite dans l’image. L’ombre est posée en CSS avec `drop-shadow` (qui épouse le détourage, contrairement à `box-shadow`), toujours verticale : `0 12px 24px`. Seule l’opacité s’adapte au fond — `rgba(0,0,0,.45)` sur charbon, `rgba(43,38,34,.20)` sur crème. |
+| **Survol** | `translateY(-4px)`, transition 200 ms. Rien d’autre. |
+| **Qualité de service** | WebP avec repli PNG (packshots) ou JPEG (scènes), en 1× et 2×, via `<picture>` + `srcset`. `loading="lazy"` partout sauf au-dessus de la ligne de flottaison (hero). |
+| **Pas de recadrage destructif** | Toute la série est exportée aux mêmes dimensions : cadre de 800 × 800 px en 2×, 400 × 400 px en 1×. |
 
-```bash
-npm run photos          # ce qui manque encore
-npm run photos -- --all # l’inventaire complet, présent ou non
+Deux composants, et deux seulement :
+
+- `src/components/Packshot.astro` — les produits. Cadre carré, détourage, ombre CSS.
+- `src/components/Photo.astro` — les photos d’ambiance (nature morte du hero, scènes
+  d’atelier, portraits d’artisans). Cadrage photographique (`cover`), sans ombre ajoutée :
+  l’ombre appartient à la scène.
+
+### Cohérence hero ↔ vignettes
+
+Un seul univers, deux fonds. La nature morte du hero n’est pas posée en rectangle sur la
+page : elle est **fondue dans le fond de la section** par un voile de dégradé
+(`.hero-voile`) qui la raccorde au charbon à gauche et en bas sur grand écran, en haut et
+en bas sur mobile — aucune arête de photo n’est visible. Les vignettes du hero sont les
+mêmes packshots détourés que ceux du catalogue, posés directement sur ce charbon avec
+l’ombre de contact. Et le vert de la bande « accès anticipé » (`#023833`) est échantillonné
+dans la photo elle-même : les deux bandes sombres du site partagent la couleur du décor
+photographié.
+
+---
+
+## 3. Ajouter ou remplacer une photo
+
+### Le circuit
+
+```
+sources/<id>.jpg              photo brute, fond quelconque
+        ↓   npm run detourer          (étape 1 — Python + rembg)
+sources/detoures/<id>.png     détourage, fond transparent
+        ↓   npm run images            (étape 2 — Node + sharp)
+public/products/<id>.webp     WebP 1× + 2×, PNG de repli, échelle normalisée
 ```
 
-### Formats attendus
+1. Déposer la photo brute dans **`sources/`**, nommée comme l’identifiant du produit
+   (`sources/tasse-tanit.jpg`). Fond uni clair de préférence, mais peu importe : il est
+   retiré.
+2. `npm run detourer` — détoure ce qui ne l’est pas encore. `-- --force` pour refaire,
+   `-- tasse-tanit` pour une seule pièce.
+3. `npm run images` — normalise l’échelle et exporte tous les formats.
+4. `npm run build` — la pièce apparaît avec sa photo.
 
-| Emplacement | Ratio | Cadrage conseillé |
-| --- | --- | --- |
-| Visuel principal de fiche / carte produit | **4 / 5** (portrait) | pièce centrée, fond uni clair |
-| Vues secondaires de la galerie produit | **1 / 1** (carré) | détail du décor, dessous signé, profil |
-| Vignettes du hero | **1 / 1** | même pièce que la fiche, cadrage serré |
-| Grande nature morte du hero (`hero-nature-morte.jpg`) | **4 / 5** | plusieurs pièces groupées, lumière rasante |
-| Images de l’atelier (`atelier-mains.jpg`, `atelier-sechage.jpg`) | **3 / 4** | le geste, les mains, le séchage |
-| Sortie de four (`sortie-de-four.jpg`) | **4 / 3** | pièces alignées à la sortie du four |
-| Portraits d’artisans (`artisans/<prenom>.jpg`) | **3 / 4** | portrait à l’atelier |
+### Les deux étapes, séparément
 
-JPEG ou WebP, 1600 px sur le grand côté minimum, ≤ 400 Ko après compression.
+L’**étape 1** demande Python et le paquet `rembg` (modèle U²-Net, ~200 Mo téléchargés au
+premier appel) :
 
-> Les cinq photos déjà en place font 744 à 941 px de large : suffisant pour la maquette,
-> un peu juste sur grand écran. Prévoir les fichiers d’origine avant la mise en ligne.
+```bash
+python3 -m pip install rembg onnxruntime pillow
+```
+
+Pourquoi un modèle, et pas un simple seuillage : un émail blanc sur fond crème ne se
+distingue pas par la couleur — la paroi d’une tasse blanche est souvent *plus claire* que
+le fond, et son ombre propre est aussi neutre qu’une ombre portée. Un détourage de secours
+sans Python existe (`npm run images -- --heuristique`, basé sur les contours), mais il
+laisse des approximations : à réserver au dépannage.
+
+Rien n’oblige à passer par rembg : **tout PNG détouré à la main** (Photoshop, Photopea,
+remove.bg, un retoucheur) déposé dans `sources/detoures/<id>.png` fait l’affaire. Les PNG
+détourés sont versionnés dans le dépôt : l’**étape 2** suffit ensuite, sans Python.
+
+### Ce qu’on attend du photographe
+
+| | |
+| --- | --- |
+| Cadrage | objet entier, centré, avec de l’air autour — le recadrage est automatique |
+| Fond | uni, clair, sans dégradé marqué ; une ombre portée douce est acceptée (elle est retirée) |
+| Lumière | **une seule direction, la même pour toute la série** : source haute, légèrement de face. C’est le seul point qu’aucun traitement ne rattrape. |
+| Résolution | 1600 px minimum sur le grand côté (voir la réserve ci-dessous) |
+| Format | JPEG ou PNG, sans profil exotique |
+| Scènes | pour les photos d’ambiance (`hero-nature-morte`, `atelier-*`, `sortie-de-four`), pas de détourage : cadrage soigné, ratio portrait pour le hero |
+
+> **Réserve sur le 2×.** Les cinq photos fournies font 744 à 941 px de large. Le pipeline
+> n’agrandit jamais une image : le « 2× » exporté vaut donc la taille native, et le 1× sa
+> moitié. C’est suffisant pour la maquette, juste sur grand écran. Avec des originaux
+> ≥ 1600 px, `npm run images` produit un vrai 2× sans rien changer au code.
 
 ### Noms de fichiers attendus
 
-Règle : `public/products/<identifiant-du-produit>.jpg` pour le visuel principal,
-puis `-2`, `-3` pour la galerie.
+Les données (`src/data/`) référencent un chemin **sans extension** — par exemple
+`/products/tasse-tanit` — et le pipeline fabrique `tasse-tanit.webp`,
+`tasse-tanit@2x.webp`, `tasse-tanit.png`, `tasse-tanit@2x.png`.
+Règle de nommage : `<identifiant-du-produit>` pour le visuel principal, puis `-2`, `-3`
+pour les vues de galerie.
 
-| Pièce | Fichiers |
+| Pièce | Visuels (base, sans extension) |
 | --- | --- |
-| Tasse Tanit | **`tasse-tanit.jpg`** ✓, **`hero-nature-morte.jpg`** ✓, `tasse-tanit-2.jpg` |
-| Mug Sabah el-Kheir | `mug-sabah-el-kheir.jpg`, `mug-sabah-el-kheir-2.jpg` |
-| Tasse Khamsa | `tasse-khamsa.jpg`, `tasse-khamsa-2.jpg` |
-| Bol Ocre du Hoggar | `bol-ocre-du-hoggar.jpg`, `bol-ocre-du-hoggar-2.jpg`, `bol-ocre-du-hoggar-3.jpg` |
-| Coffret de bols Tassili | `coffret-bols-tassili.jpg`, `coffret-bols-tassili-2.jpg`, `coffret-bols-tassili-3.jpg` |
-| Bol Pêche & Signes | `bol-peche-et-signes.jpg`, `bol-peche-et-signes-2.jpg` |
-| Tajine Fleurs de Nedroma | `tajine-fleurs-de-nedroma.jpg`, `tajine-fleurs-de-nedroma-2.jpg`, `tajine-fleurs-de-nedroma-3.jpg` |
-| Tajine Dhahab | `tajine-dhahab.jpg`, `tajine-dhahab-2.jpg` |
-| Assiette Étoile de Béjaïa | `assiette-etoile-de-bejaia.jpg`, `assiette-etoile-de-bejaia-2.jpg` |
-| Plat Bord Safran | `plat-bord-safran.jpg`, `plat-bord-safran-2.jpg` |
-| Plateau Baklawa | `plateau-baklawa.jpg`, `plateau-baklawa-2.jpg`, `plateau-baklawa-3.jpg` |
-| Plateau Makrout & Griwech | `plateau-makrout-griwech.jpg`, `plateau-makrout-griwech-2.jpg` |
-| Plateau Bourek du vendredi | `plateau-bourek-du-vendredi.jpg`, `plateau-bourek-du-vendredi-2.jpg` |
-| Qraba Casbah | **`qraba-casbah.jpg`** ✓, `qraba-casbah-2.jpg`, `qraba-casbah-3.jpg` |
-| Qraba El Khat | **`qraba-el-khat.jpg`** ✓, **`hero-nature-morte.jpg`** ✓, `qraba-el-khat-2.jpg` |
-| Qraba Zahra | **`qraba-zahra.jpg`** ✓, `qraba-zahra-2.jpg` |
-| Gourde Haïk | `gourde-haik.jpg`, `gourde-haik-2.jpg` |
-| Qraba émaillée Bleu d’Alger | `qraba-emaillee-bleu-alger.jpg`, `qraba-emaillee-bleu-alger-2.jpg` |
-| Pichet Rayures de Ghardaïa | `pichet-rayures-de-ghardaia.jpg`, `pichet-rayures-de-ghardaia-2.jpg` |
-| Carafe Ligne Blanche | `carafe-ligne-blanche.jpg`, `carafe-ligne-blanche-2.jpg` |
-| Carreau Zellige Étoile | `carreau-zellige-etoile.jpg`, `carreau-zellige-etoile-2.jpg` |
-| Planche Zellige | `planche-zellige.jpg`, `planche-zellige-2.jpg` |
-| Main de Fatma murale | `main-de-fatma-murale.jpg`, `main-de-fatma-murale-2.jpg` |
-| Repose-cuillère Khamsa | `repose-cuillere-khamsa.jpg`, `repose-cuillere-khamsa-2.jpg` |
-| Savon Fleur d’oranger | `savon-fleur-oranger.jpg`, `savon-fleur-oranger-2.jpg` |
-| Savon Figue de Barbarie | `savon-figue-de-barbarie.jpg`, `savon-figue-de-barbarie-2.jpg` |
-| Def peint | `def-peint.jpg`, `def-peint-2.jpg` |
-| Cadre Portes de la Casbah | `cadre-portes-de-la-casbah.jpg`, `cadre-portes-de-la-casbah-2.jpg` |
-| Affiche Alger la Blanche | `affiche-alger-la-blanche.jpg`, `affiche-alger-la-blanche-2.jpg` |
+| Tasse Tanit | **`tasse-tanit`** ✓, `tasse-tanit-2`, `tasse-tanit-3` |
+| Mug Sabah el-Kheir | `mug-sabah-el-kheir`, `mug-sabah-el-kheir-2` |
+| Tasse Khamsa | `tasse-khamsa`, `tasse-khamsa-2` |
+| Bol Ocre du Hoggar | `bol-ocre-du-hoggar`, `bol-ocre-du-hoggar-2`, `bol-ocre-du-hoggar-3` |
+| Coffret de bols Tassili | `coffret-bols-tassili`, `coffret-bols-tassili-2`, `coffret-bols-tassili-3` |
+| Bol Pêche & Signes | `bol-peche-et-signes`, `bol-peche-et-signes-2` |
+| Tajine Fleurs de Nedroma | `tajine-fleurs-de-nedroma`, `tajine-fleurs-de-nedroma-2`, `tajine-fleurs-de-nedroma-3` |
+| Tajine Dhahab | `tajine-dhahab`, `tajine-dhahab-2` |
+| Assiette Étoile de Béjaïa | `assiette-etoile-de-bejaia`, `assiette-etoile-de-bejaia-2` |
+| Plat Bord Safran | `plat-bord-safran`, `plat-bord-safran-2` |
+| Plateau Baklawa | `plateau-baklawa`, `plateau-baklawa-2`, `plateau-baklawa-3` |
+| Plateau Makrout & Griwech | `plateau-makrout-griwech`, `plateau-makrout-griwech-2` |
+| Plateau Bourek du vendredi | `plateau-bourek-du-vendredi`, `plateau-bourek-du-vendredi-2` |
+| Qraba Casbah | **`qraba-casbah`** ✓, `qraba-casbah-2`, `qraba-casbah-3` |
+| Qraba El Khat | **`qraba-el-khat`** ✓, `qraba-el-khat-2`, `qraba-el-khat-3` |
+| Qraba Zahra | **`qraba-zahra`** ✓, `qraba-zahra-2` |
+| Gourde Haïk | `gourde-haik`, `gourde-haik-2` |
+| Qraba émaillée Bleu d’Alger | `qraba-emaillee-bleu-alger`, `qraba-emaillee-bleu-alger-2` |
+| Pichet Rayures de Ghardaïa | `pichet-rayures-de-ghardaia`, `pichet-rayures-de-ghardaia-2` |
+| Carafe Ligne Blanche | `carafe-ligne-blanche`, `carafe-ligne-blanche-2` |
+| Carreau Zellige Étoile | `carreau-zellige-etoile`, `carreau-zellige-etoile-2` |
+| Planche Zellige | `planche-zellige`, `planche-zellige-2` |
+| Main de Fatma murale | `main-de-fatma-murale`, `main-de-fatma-murale-2` |
+| Repose-cuillère Khamsa | `repose-cuillere-khamsa`, `repose-cuillere-khamsa-2` |
+| Savon Fleur d’oranger | `savon-fleur-oranger`, `savon-fleur-oranger-2` |
+| Savon Figue de Barbarie | `savon-figue-de-barbarie`, `savon-figue-de-barbarie-2` |
+| Def peint | `def-peint`, `def-peint-2` |
+| Cadre Portes de la Casbah | `cadre-portes-de-la-casbah`, `cadre-portes-de-la-casbah-2` |
+| Affiche Alger la Blanche | `affiche-alger-la-blanche`, `affiche-alger-la-blanche-2` |
+Les visuels **en gras suivis de ✓** sont déjà livrés et traités.
 
-Les fichiers **en gras suivis de ✓** sont déjà en place.
+Scènes : `hero-nature-morte` ✓, `atelier-mains`, `atelier-sechage`, `sortie-de-four`.
+Portraits : `artisans/yasmine`, `artisans/karim`, `artisans/nawel`, `artisans/sofiane`,
+`artisans/lilia`, `artisans/mehdi`, `artisans/amina`.
 
-Visuels éditoriaux : `hero-nature-morte.jpg` ✓ (fournie), `atelier-mains.jpg`, `atelier-sechage.jpg`,
-`sortie-de-four.jpg`.
-Portraits : `artisans/yasmine.jpg`, `artisans/karim.jpg`, `artisans/nawel.jpg`,
-`artisans/sofiane.jpg`, `artisans/lilia.jpg`, `artisans/mehdi.jpg`, `artisans/amina.jpg`.
+```bash
+npm run photos          # ce qui manque ou attend un traitement
+npm run photos -- --all # l'inventaire complet
+```
+
+Tant qu’un visuel manque, le site affiche un **repère au format exact** de la photo à
+venir, dans le même cadre que les autres : la grille ne bouge pas d’un pixel quand la
+photo arrive. La page d’accueil met automatiquement en avant les pièces déjà
+photographiées (`photosDabord()` dans `src/lib/images.ts`).
 
 > Ne jamais copier de photo Instagram ou de tiers : toutes les images doivent être
 > produites par la marque ou cédées par écrit.
 
 ---
 
-## 3. Où changer quoi
+## 4. Où changer quoi
 
 | Ce que vous voulez changer | Fichier |
 | --- | --- |
@@ -133,7 +206,8 @@ Portraits : `artisans/yasmine.jpg`, `artisans/karim.jpg`, `artisans/nawel.jpg`,
 | Fiches produit (nom, description, traçabilité) | `src/data/products.ts` |
 | Menu, liens de pied de page, sélecteur de langue | `src/data/brand.ts` |
 | Textes de la page d’accueil (hero, philosophie, valeurs, CTA) | `src/pages/index.astro` |
-| **Couleurs, polices, arrondis** | `src/styles/global.css` (bloc `@theme`) |
+| **Couleurs, polices, arrondis, ombres produit** | `src/styles/global.css` (bloc `@theme`) |
+| Échelle des packshots, taille des cadres | `scripts/preparer-images.mjs` (constantes en tête) |
 
 Tout ce qui est écrit **entre crochets** est un placeholder à remplacer avant la mise en
 ligne : `[PRIX]`, `[Yasmine]`, `[+33 6 00 00 00 00]`, `[1 020 °C]`, `[Ø 32 cm]`…
@@ -141,7 +215,7 @@ Pour les repérer : `grep -rn "\[" src/data/`.
 
 ---
 
-## 4. Ajouter un produit
+## 5. Ajouter un produit
 
 1. Ouvrir `src/data/products.ts` et copier un objet existant de la même famille.
 2. Renseigner au minimum :
@@ -155,11 +229,11 @@ Pour les repérer : `grep -rn "\[" src/data/`.
   artisan: 'lilia',                 // doit exister dans artisans.ts
   ville: 'Constantine',
   description: '…',                 // 1–2 phrases : carte produit + meta description
-  descriptionLongue: '…',           // le geste, la matière, ce qui varie d’une pièce à l’autre
+  descriptionLongue: '…',           // le geste, la matière, ce qui varie d'une pièce à l'autre
   prix: PRIX_PLACEHOLDER,
-  image: '/products/plateau-mchewek.jpg',
-  galerie: ['/products/plateau-mchewek-2.jpg'],
-  vedette: true,                    // facultatif : remonte la pièce en page d’accueil
+  image: '/products/plateau-mchewek',          // SANS extension
+  galerie: ['/products/plateau-mchewek-2'],
+  vedette: true,                    // facultatif : remonte la pièce en page d'accueil
   tracabilite: { argile: '…', technique: '…', cuisson: '…', dimensions: '…', entretien: '…' },
   commerce: commerce('PLA-MCH-01'), // ('PLA-MCH-01', 'serie') si la pièce est refaite à la demande
 }
@@ -167,73 +241,84 @@ Pour les repérer : `grep -rn "\[" src/data/`.
 
 3. `npm run check` puis `npm run dev` : la page `/produits/plateau-mchewek` et l’entrée
    dans `/collection` sont générées automatiquement.
-4. Déposer la photo dans `public/products/` (ou la laisser venir plus tard).
+4. Déposer la photo dans `sources/` et lancer le pipeline (§ 3), ou la laisser venir plus
+   tard.
 
 Pour ajouter une **famille d’objets**, ajouter d’abord une entrée dans
-`src/data/categories.ts` : elle apparaît dans le filtre de `/collection` et dans le pied de page.
+`src/data/categories.ts` : elle apparaît dans le filtre de `/collection` et dans le pied de
+page.
 
 ---
 
-## 5. Structure
+## 6. Structure
 
 ```
 atelier-alger/
+├── sources/                   ← photos brutes (versionnées, hors du site publié)
+│   └── detoures/              ← PNG détourés, entrée de l'étape 2
 ├── public/
 │   ├── favicon.svg
-│   └── products/              ← toutes les photos, + artisans/
-├── scripts/photos.mjs         ← inventaire des photos manquantes
+│   └── products/              ← visuels générés : WebP + replis, 1× et 2×
+├── scripts/
+│   ├── detourer.py            ← étape 1 : détourage (U²-Net)
+│   ├── preparer-images.mjs    ← étape 2 : normalisation d'échelle et export
+│   └── photos.mjs             ← inventaire des visuels
 └── src/
     ├── components/
     │   ├── Footer.astro
     │   ├── Header.astro       ← menu accessible (aria-expanded, Échap)
     │   ├── Logo.astro
-    │   ├── ProductCard.astro
-    │   └── Visuel.astro       ← photo si elle existe, sinon placeholder au même format
+    │   ├── Packshot.astro     ← LE cadre produit : carré, détouré, ombre unique
+    │   ├── Photo.astro        ← photos d'ambiance et portraits
+    │   └── ProductCard.astro
     ├── data/                  ← TOUT le contenu modifiable
     │   ├── artisans.ts
     │   ├── brand.ts
     │   ├── categories.ts
     │   └── products.ts
     ├── layouts/Base.astro
-    ├── lib/images.ts
+    ├── lib/images.ts          ← jeux WebP/repli + tri « photos d'abord »
     ├── pages/
-    │   ├── index.astro        ← page d’accueil
+    │   ├── index.astro        ← page d'accueil
     │   ├── collection.astro   ← catalogue complet par famille
-    │   └── produits/[slug].astro  ← une page par pièce (27 générées)
-    └── styles/global.css      ← palette, typographie, composants de base
+    │   └── produits/[slug].astro  ← une page par pièce (29 générées)
+    └── styles/global.css      ← palette, typographie, système packshot
 ```
 
 ---
 
-## 6. Direction artistique
+## 7. Direction artistique
 
 | Jeton | Valeur | Usage |
 | --- | --- | --- |
-| `lin` | `#F5EFE6` | fond général |
-| `lin-profond` | `#EDE4D7` | fonds de placeholder alternés |
-| `ardoise` | `#2B2622` | texte, fond du hero |
-| `argile` | `#8B4530` | accents, bouton principal |
-| `teal` / `teal-profond` | `#4F7C77` / `#3C625E` | accents ; le teal foncé porte le texte blanc du bandeau CTA |
-| `filet` | `#DDD2C1` | filets de 1 px |
+| `lin` | `#F5F0E8` | le crème des sections produit, fond dominant |
+| `ardoise` | `#2B2622` | texte, et fond charbon du hero |
+| `argile` | `#8B4530` | accents, bouton principal sur fond clair |
+| `argile-clair` | `#A9583F` | bouton principal sur fond sombre (contraste de bordure) |
+| `teal` / `teal-profond` | `#4F7C77` / `#3C625E` | accents, nom de l’artisan |
+| `vert-atelier` | `#023833` | bandes sombres — couleur échantillonnée dans la nature morte |
+| `filet` | `#DDD2C1` | filets de 1 px, repères d’attente |
 | `mastic` | `#6B5F55` | légendes et textes secondaires |
-| `blanc` | `#FFFFFF` | cartes et sections |
+| `blanc` | `#FFFFFF` | tableau de traçabilité, champs de formulaire |
 
 Typographie (Google Fonts) : **DM Serif Display** pour les titres (italique sur les grands
 titres), **Jost** pour le corps, **Noto Naskh Arabic** pour les accents arabes.
 Arrondis : 2–4 px (`rounded-xs`, `rounded-sm`, `rounded-md`).
 
-**Contrastes** — toutes les paires texte/fond du site ont été vérifiées ≥ 4,9:1 (AA).
-Le teal de la charte est assombri (`#3C625E`) sous le texte blanc du bandeau CTA :
-le teal d’origine plafonne à 3,6:1 pour le texte secondaire, en dessous du seuil AA.
+**Contrastes** — toutes les paires texte/fond du site ont été vérifiées ≥ 5,4:1 (AA).
+Deux arbitrages, documentés dans `global.css` :
+le teal de la charte est assombri (`#3C625E`) pour le texte fin, et le bouton primaire
+passe à l’argile clair sur fond sombre (l’argile de la charte ne donne que 2,1:1 pour la
+bordure du composant, sous le seuil 3:1 de la règle 1.4.11).
 
 **Accessibilité** — liens et boutons natifs uniquement (aucun `onClick` sur une `div`),
-cibles tactiles ≥ 44 px, `alt` sur toutes les images (les placeholders portent
+cibles tactiles ≥ 44 px, `alt` sur toutes les images (les repères d’attente portent
 `role="img"` + `aria-label`), lien d’évitement, focus visible, `prefers-reduced-motion`
 respecté.
 
 ---
 
-## 7. Phase 2 — ce qui n’est pas dans le MVP
+## 8. Phase 2 — ce qui n’est pas dans le MVP
 
 - **Commerce.** `Product.commerce` (`sku`, `devise`, `disponibilite`, `referenceExterne`)
   est déjà là : brancher Shopify ou Stripe revient à remplir `referenceExterne` et à

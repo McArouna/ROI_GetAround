@@ -1,51 +1,74 @@
 /**
- * Inventaire des photos attendues.
- *   npm run photos          → liste ce qui manque dans public/products/
- *   npm run photos -- --all → liste tout, présent ou non
+ * Inventaire des visuels.
  *
- * Les chemins sont lus directement dans src/data/products.ts et dans les
- * visuels éditoriaux des pages : pas de liste à tenir à jour en double.
+ *   npm run photos          → ce qui manque
+ *   npm run photos -- --all → l'inventaire complet
+ *
+ * Trois états pour chaque visuel attendu par le site :
+ *   ✓ livré      le jeu WebP + repli est présent dans public/products/
+ *   ~ à traiter  la photo brute est dans sources/, il reste à lancer
+ *                « npm run detourer » puis « npm run images »
+ *   · manquant   aucune photo reçue
+ *
+ * Les chemins attendus sont lus dans src/data/ et dans les pages : pas de
+ * liste à tenir à jour en double.
  */
-import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const racine = new URL('../', import.meta.url);
-const sources = [
+const chemin = (relatif) => fileURLToPath(new URL(relatif, racine));
+
+const sourcesCode = [
   'src/data/products.ts',
   'src/data/artisans.ts',
   'src/pages/index.astro',
+  'src/pages/produits/[slug].astro',
 ];
 
-const attendues = new Set();
-for (const fichier of sources) {
-  const contenu = readFileSync(fileURLToPath(new URL(fichier, racine)), 'utf8');
-  for (const [, chemin] of contenu.matchAll(/'(\/products\/[^']+)'/g)) attendues.add(chemin);
+const attendus = new Set();
+for (const fichier of sourcesCode) {
+  const contenu = readFileSync(chemin(fichier), 'utf8');
+  for (const [, base] of contenu.matchAll(/['"](\/products\/[A-Za-z0-9\-/]+)['"]/g)) {
+    attendus.add(base);
+  }
 }
+
+const extensionsSource = ['.jpg', '.jpeg', '.png', '.webp'];
+const etat = (base) => {
+  const nom = base.replace('/products/', '');
+  const livre = existsSync(chemin(`public${base}.webp`));
+  const detoure = existsSync(chemin(`sources/detoures/${nom}.png`));
+  const brute = extensionsSource.some((e) => existsSync(chemin(`sources/${nom}${e}`)));
+  if (livre) return { signe: '✓', libelle: 'livré' };
+  if (detoure) return { signe: '~', libelle: 'détouré, lancer « npm run images »' };
+  if (brute) return { signe: '~', libelle: 'photo brute reçue, lancer « npm run detourer »' };
+  return { signe: '·', libelle: 'manquant' };
+};
 
 const tout = process.argv.includes('--all');
-const lignes = [...attendues].sort().map((chemin) => {
-  const present = existsSync(fileURLToPath(new URL(`.${chemin}`, new URL('public/', racine))));
-  return { chemin, present };
-});
+const lignes = [...attendus].sort().map((base) => ({ base, ...etat(base) }));
+const livres = lignes.filter((l) => l.signe === '✓');
 
-const manquantes = lignes.filter((l) => !l.present);
-for (const { chemin, present } of tout ? lignes : manquantes) {
-  console.log(`${present ? '✓' : '·'} public${chemin}`);
+for (const ligne of tout ? lignes : lignes.filter((l) => l.signe !== '✓')) {
+  console.log(`${ligne.signe} ${ligne.base.replace('/products/', '')} — ${ligne.libelle}`);
 }
 
-const dossier = fileURLToPath(new URL('public/products/', racine));
-const inattendues = existsSync(dossier)
-  ? readdirSync(dossier, { withFileTypes: true })
-      .filter((e) => e.isFile() && !e.name.startsWith('.'))
-      .map((e) => `/products/${e.name}`)
-      .filter((c) => !attendues.has(c))
-  : [];
+console.log(`\n${livres.length}/${lignes.length} visuel(s) en place.`);
 
-console.log(
-  `\n${attendues.size - manquantes.length}/${attendues.size} photo(s) en place — ${manquantes.length} manquante(s).`,
-);
-if (inattendues.length) {
-  console.log(
-    `\nFichiers présents mais non référencés (nom inattendu ?) :\n${inattendues.map((c) => `  public${c}`).join('\n')}`,
-  );
+// Fichiers présents dans public/products/ sans entrée dans les données : en
+// général une faute de frappe dans le nom.
+const dossier = chemin('public/products');
+const connus = new Set([...attendus].map((b) => b.replace('/products/', '')));
+const inattendus = existsSync(dossier)
+  ? [
+      ...new Set(
+        readdirSync(dossier, { withFileTypes: true })
+          .filter((e) => e.isFile() && !e.name.startsWith('.'))
+          .map((e) => e.name.replace(/(@2x)?\.(webp|png|jpe?g)$/i, '')),
+      ),
+    ].filter((nom) => !connus.has(nom))
+  : [];
+if (inattendus.length) {
+  console.log(`\nFichiers non référencés (nom inattendu ?) :\n  ${inattendus.join('\n  ')}`);
 }

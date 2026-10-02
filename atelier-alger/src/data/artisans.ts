@@ -28,7 +28,7 @@ export const artisans: Artisan[] = [
     region: 'Casbah',
     metier: 'Peintre sur émail',
     bio: 'Elle peint assise face à la baie, pinceau à trois poils, sans report ni pochoir. Ses khamsas ne sont jamais deux fois identiques : le tracé suit la courbe de la pièce, pas l’inverse. Elle signe chaque fond d’un point d’argile.',
-    portrait: '/products/artisans/yasmine.jpg',
+    portrait: '/products/artisans/yasmine',
   },
   {
     id: 'karim',
@@ -38,7 +38,7 @@ export const artisans: Artisan[] = [
     region: 'M’zab',
     metier: 'Tourneur',
     bio: 'Formé au tour à pied dans l’atelier de son oncle, il monte ses carafes en une seule levée. Il dit reconnaître une bonne argile au bruit qu’elle fait quand on la claque sur la table.',
-    portrait: '/products/artisans/karim.jpg',
+    portrait: '/products/artisans/karim',
   },
   {
     id: 'nawel',
@@ -48,7 +48,7 @@ export const artisans: Artisan[] = [
     region: 'Kabylie',
     metier: 'Céramiste, modelage au colombin',
     bio: 'Elle travaille sans tour, au colombin, comme les potières de son village. Les signes qu’elle trace — chevrons, losanges, peigne — sont ceux que sa grand-mère posait sur les jarres à eau.',
-    portrait: '/products/artisans/nawel.jpg',
+    portrait: '/products/artisans/nawel',
   },
   {
     id: 'sofiane',
@@ -58,7 +58,7 @@ export const artisans: Artisan[] = [
     region: 'Tlemcen',
     metier: 'Décorateur, rehauts d’or',
     bio: 'Il pose les rehauts au dernier moment, après la seconde cuisson, sur une pièce encore tiède. Un tajine lui prend une journée entière ; il refuse d’en peindre deux le même jour.',
-    portrait: '/products/artisans/sofiane.jpg',
+    portrait: '/products/artisans/sofiane',
   },
   {
     id: 'lilia',
@@ -68,7 +68,7 @@ export const artisans: Artisan[] = [
     region: 'Constantinois',
     metier: 'Illustratrice sur faïence',
     bio: 'Elle dessine les gâteaux avant de les peindre, à la mine de plomb, sur papier calque. Baklawa, makrout, griwech : elle passe autant de temps à les observer sur les plateaux de fête qu’à les reproduire.',
-    portrait: '/products/artisans/lilia.jpg',
+    portrait: '/products/artisans/lilia',
   },
   {
     id: 'mehdi',
@@ -78,7 +78,7 @@ export const artisans: Artisan[] = [
     region: 'Tlemcen',
     metier: 'Carreleur-céramiste',
     bio: 'Il découpe ses carreaux à la main, arête par arête, puis les émaille un par un. Les légères différences d’épaisseur sont voulues : posés côte à côte, ils accrochent la lumière comme un vrai panneau ancien.',
-    portrait: '/products/artisans/mehdi.jpg',
+    portrait: '/products/artisans/mehdi',
   },
   {
     id: 'amina',
@@ -88,7 +88,7 @@ export const artisans: Artisan[] = [
     region: 'Kabylie',
     metier: 'Savonnière & illustratrice',
     bio: 'Elle coule ses savons à froid, les laisse sécher six semaines, puis les range dans des boîtes métal qu’elle illustre elle-même. La boîte se garde bien après le savon — c’est l’idée.',
-    portrait: '/products/artisans/amina.jpg',
+    portrait: '/products/artisans/amina',
   },
 ];
 

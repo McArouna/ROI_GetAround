@@ -1,0 +1,92 @@
+---
+/**
+ * Packshot produit — le système d'image unique du site.
+ *
+ * Contrat, identique pour TOUTES les vignettes :
+ *  - cadre carré (aspect-ratio 1/1), sans fond : le fond visible est celui de
+ *    la section, jamais celui de la photo ;
+ *  - image détourée à fond transparent, où l'objet occupe toujours ~70 % de la
+ *    hauteur (marge interne constante, cuite par scripts/preparer-images.mjs —
+ *    aucun zoom au cas par cas côté CSS) ;
+ *  - une seule ombre portée, posée en `drop-shadow` donc épousant le
+ *    détourage, avec une seule direction de lumière pour toute la série ;
+ *  - WebP + PNG de repli, 1× et 2×, `lazy` sauf au-dessus de la ligne de
+ *    flottaison.
+ *
+ * Tant que la photo n'est pas livrée, le même cadre affiche un repère aux
+ * mêmes dimensions : la régularité de la grille ne bouge pas.
+ */
+import { jeuImage } from '../lib/images';
+
+interface Props {
+  /** Chemin de base, sans extension : « /products/tasse-tanit ». */
+  src: string;
+  alt: string;
+  /** Nom affiché dans le repère, tant que la photo manque. */
+  legende?: string;
+  /** Fond de la section qui accueille la vignette. */
+  variante?: 'sombre' | 'creme';
+  /** Image au-dessus de la ligne de flottaison : chargement immédiat. */
+  priorite?: boolean;
+  /** Léger soulèvement au survol (vignettes cliquables). */
+  survol?: boolean;
+  /** Largeur d'affichage, pour que le navigateur choisisse la bonne densité. */
+  tailles?: string;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  legende,
+  variante = 'creme',
+  priorite = false,
+  survol = false,
+  tailles,
+  class: classe = '',
+} = Astro.props;
+
+const jeu = jeuImage(src, 'png');
+const classes = [
+  'packshot',
+  variante === 'sombre' ? 'packshot--sombre' : 'packshot--creme',
+  survol ? 'packshot--survol' : '',
+  classe,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<figure class={classes}>
+  {
+    jeu.existe ? (
+      <picture>
+        <source type="image/webp" srcset={jeu.webp} sizes={tailles} />
+        <source type={jeu.typeRepli} srcset={jeu.repli} sizes={tailles} />
+        <img
+          src={jeu.source}
+          alt={alt}
+          width="800"
+          height="800"
+          loading={priorite ? 'eager' : 'lazy'}
+          fetchpriority={priorite ? 'high' : 'auto'}
+          decoding="async"
+          class="packshot__image"
+        />
+      </picture>
+    ) : (
+      <div class="packshot__attente" role="img" aria-label={alt}>
+        <svg width="24" height="24" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+          <path d="M4 9.5h18c0 6.1-4.03 11-9 11s-9-4.9-9-11Z" stroke="currentColor" stroke-width="1" />
+          <path
+            d="M9.5 9.5c0-3.2 1.57-5.8 3.5-5.8s3.5 2.6 3.5 5.8"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+        </svg>
+        {legende && <span class="packshot__nom">{legende}</span>}
+        <span class="packshot__mention">Photo à venir</span>
+      </div>
+    )
+  }
+</figure>

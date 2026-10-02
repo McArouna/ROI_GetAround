@@ -1,0 +1,73 @@
+---
+/**
+ * Photo d'ambiance (scène d'atelier, portrait d'artisan, nature morte).
+ *
+ * À distinguer du packshot : ici l'image est un cadrage photographique, donc
+ * `object-fit: cover` dans le ratio demandé, sans ombre portée — l'ombre
+ * appartient à la scène. Même exigence technique : WebP + JPEG de repli,
+ * 1× et 2×, `lazy` par défaut.
+ */
+import { jeuImage } from '../lib/images';
+
+interface Props {
+  /** Chemin de base, sans extension. */
+  src: string;
+  alt: string;
+  legende?: string;
+  /** Ratio CSS du cadre, ex. « 3 / 4 ». */
+  ratio?: string;
+  priorite?: boolean;
+  tailles?: string;
+  /** Fond du repère d'attente. */
+  variante?: 'sombre' | 'creme';
+  /** Remplit son conteneur (hero) au lieu de tenir un ratio. */
+  plein?: boolean;
+  class?: string;
+}
+
+const {
+  src,
+  alt,
+  legende,
+  ratio = '3 / 4',
+  priorite = false,
+  tailles,
+  variante = 'creme',
+  plein = false,
+  class: classe = '',
+} = Astro.props;
+
+const jeu = jeuImage(src, 'jpg');
+const classes = [
+  'photo',
+  variante === 'sombre' ? 'photo--sombre' : 'photo--creme',
+  plein ? 'photo--plein' : '',
+  classe,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<figure class={classes} style={plein ? undefined : `aspect-ratio: ${ratio};`}>
+  {
+    jeu.existe ? (
+      <picture>
+        <source type="image/webp" srcset={jeu.webp} sizes={tailles} />
+        <source type={jeu.typeRepli} srcset={jeu.repli} sizes={tailles} />
+        <img
+          src={jeu.source}
+          alt={alt}
+          loading={priorite ? 'eager' : 'lazy'}
+          fetchpriority={priorite ? 'high' : 'auto'}
+          decoding="async"
+          class="photo__image"
+        />
+      </picture>
+    ) : (
+      <div class="photo__attente" role="img" aria-label={alt}>
+        {legende && <span class="packshot__nom">{legende}</span>}
+        <span class="packshot__mention">Photo à venir</span>
+      </div>
+    )
+  }
+</figure>
