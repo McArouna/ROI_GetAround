@@ -1,0 +1,18 @@
+# Déploiement Netlify du site Atelier Alger.
+# Le site vit dans le sous-dossier atelier-alger/ (la racine du dépôt contient
+# un ancien outil sans rapport) : Netlify y construit et publie dist/.
+[build]
+  base = "atelier-alger"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Astro 7 exige Node 22.12 ou plus récent.
+  NODE_VERSION = "22"
+
+# Les visuels générés ne changent pas d'une version à l'autre sans changer
+# de contenu : on autorise le navigateur à les garder en cache une semaine.
+[[headers]]
+  for = "/products/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

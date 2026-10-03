@@ -31,9 +31,11 @@ npm run dev        # http://localhost:4321
 | `npm run images` | étape 2 : normalisation et export WebP / PNG / JPEG, 1× et 2× |
 | `npm run photos` | inventaire des visuels livrés, à traiter ou manquants |
 
-**Déploiement** — le dossier à déployer est `atelier-alger/` (le dépôt contient aussi un
-ancien outil à sa racine). Vercel : Root Directory `atelier-alger`. Netlify : Base
-directory `atelier-alger`, Publish `atelier-alger/dist`.
+**Déploiement** — tout est réglé dans `netlify.toml`, à la racine du dépôt : dossier de
+base `atelier-alger`, commande `npm run build`, publication de `dist`, Node 22 (Astro 7
+exige Node ≥ 22.12). Sur Netlify : *Add new site → Import an existing project → GitHub*,
+choisir le dépôt et la branche, puis *Deploy* — aucun réglage à saisir à la main.
+Sur Vercel : Root Directory `atelier-alger`, Node 22.
 
 ---
 
